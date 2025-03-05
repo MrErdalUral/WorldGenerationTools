@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 031820bd02404daea819692a60c40e47, type: 3}
+  m_Name: PoissonDiscSettings
+  m_EditorClassIdentifier: 
+  RegionSize: {x: 100, y: 100}
+  MinY: -50
+  MaxY: 50
+  MinRadius: 0.1
+  MaxRadius: 1
+  MaxSlopeAngle: 30
+  NumSamplesBeforeRejection: 15
+  VisualisationDelay: -0.001
+  PerlinIterations: 5
+  PerlinScale: 0.2
+  PerlinOffset: {x: 0, y: 0}
