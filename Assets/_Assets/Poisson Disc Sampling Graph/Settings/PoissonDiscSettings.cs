@@ -6,7 +6,7 @@ using UnityEngine;
 namespace FourWinged.PoissonGraph.Settings
 {
     [CreateAssetMenu(fileName = "PoissonDiscSettings", menuName = "Poisson Disc/Settings")]
-    public class PoissonDiscSettings : ScriptableObject,IPoissonDiscSettings
+    public class PoissonDiscSettings : ScriptableObject, IPoissonDiscSettings
     {
         [SerializeField]private Vector2 _regionSize = new Vector2(10, 10);
         [SerializeField]private float _minRadius = 0.5f;

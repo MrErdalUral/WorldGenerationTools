@@ -149,9 +149,8 @@ namespace FourWinged.Grids.SpatialGrid
 
         public bool CheckRadiusEmpty(float radius, Vector3 center)
         {
-            Bounds sphereBounds = new Bounds(center, Vector3.one * (2f * radius));
-            Vector3Int minCellPos = GetCellPosition(sphereBounds.min);
-            Vector3Int maxCellPos = GetCellPosition(sphereBounds.max);
+            Vector3Int minCellPos = GetCellPosition(center - Vector3.one * radius);
+            Vector3Int maxCellPos = GetCellPosition(center + Vector3.one * radius);
 
             // Then figure out which chunks that cell range spans.
             Vector3Int minChunkPos = GetChunkPosition(minCellPos.x, minCellPos.y, minCellPos.z);
@@ -227,14 +226,14 @@ namespace FourWinged.Grids.SpatialGrid
                                     //    If (d > radius + halfDiag) => entire cell outside
                                     //    else => partial => check per-object
                                     //----------------------------------------------------
-                                    float sqrDistToCenter = (cellCenter - center).sqrMagnitude;
+                                    float distToCenter = (cellCenter - center).magnitude;
 
-                                    if (sqrDistToCenter < (radius - _cellRadius) * (radius - _cellRadius))
+                                    if (distToCenter < (radius - _cellRadius))
                                     {
                                         if (cell.Count > 1)
                                             return false;
                                     }
-                                    else if (sqrDistToCenter > (radius + _cellRadius) * (radius + _cellRadius))
+                                    else if (distToCenter > (radius + _cellRadius))
                                     {
                                         // skip
                                     }
@@ -346,13 +345,13 @@ namespace FourWinged.Grids.SpatialGrid
                                     //    If (d > radius + halfDiag) => entire cell outside
                                     //    else => partial => check per-object
                                     //----------------------------------------------------
-                                    float sqrDistToCenter = (cellCenter - center).sqrMagnitude;
+                                    float distToCenter = (cellCenter - center).magnitude;
 
-                                    if (sqrDistToCenter < (radius - _cellRadius) * (radius - _cellRadius))
+                                    if (distToCenter < (radius - _cellRadius))
                                     {
                                         _uniqueResults.UnionWith(cell);
                                     }
-                                    else if (sqrDistToCenter > (radius + _cellRadius) * (radius + _cellRadius))
+                                    else if (distToCenter > (radius + _cellRadius))
                                     {
                                         // skip
                                     }

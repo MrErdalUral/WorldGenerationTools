@@ -138,9 +138,8 @@ namespace FourWinged.Grids.SpatialGrid
 
         public bool CheckRadiusEmpty(float radius, Vector2 center)
         {
-            Rect sphereBounds = new Rect(center - Vector2.one * radius, Vector2.one * (2f * radius));
-            Vector2Int minCellPos = GetCellPosition(sphereBounds.min);
-            Vector2Int maxCellPos = GetCellPosition(sphereBounds.max);
+            Vector2Int minCellPos = GetCellPosition(center - Vector2.one * radius);
+            Vector2Int maxCellPos = GetCellPosition(center + Vector2.one * radius);
 
             // Then figure out which chunks that cell range spans.
             Vector2Int minChunkPos = GetChunkPosition(minCellPos.x, minCellPos.y);
@@ -184,34 +183,22 @@ namespace FourWinged.Grids.SpatialGrid
                         {
                             int cellY = chunkMinY + ly;
                             var cell = chunk[lx, ly];
-                            if (cell == null)
+                            if (cell == null || cell.Count < 1)
                                 continue;
 
-                            //----------------------------------------------------
-                            // 1) Compute the center of this cell
-                            //----------------------------------------------------
                             Vector2 cellCenter = GetCellCenter(cellX, cellY);
 
-                            //----------------------------------------------------
-                            // 2) Distance-based culling logic:
-                            //
-                            //    d = distance(queryCenter, cellCenter)
-                            //    If (d + halfDiag < radius) => entire cell inside
-                            //    If (d > radius + halfDiag) => entire cell outside
-                            //    else => partial => check per-object
-                            //----------------------------------------------------
-                            float sqrDistToCenter = (cellCenter - center).sqrMagnitude;
+                            float distToCenter = (cellCenter - center).magnitude;
 
-                            if (sqrDistToCenter < (radius - _cellRadius) * (radius - _cellRadius))
+                            if (distToCenter <= (radius - _cellRadius)) //Query fully covers the whole cell
                             {
-                                if (cell.Count > 1)
-                                    return false;
+                                return false;
                             }
-                            else if (sqrDistToCenter > (radius + _cellRadius) * (radius + _cellRadius))
+                            else if (distToCenter > (radius + _cellRadius)) //Query does not cover the cell at all
                             {
                                 // skip
                             }
-                            else
+                            else // Query overlaps the cell
                             {
                                 // Partial overlap => do per-object checks
                                 foreach (var obj in cell)
@@ -285,7 +272,7 @@ namespace FourWinged.Grids.SpatialGrid
                         {
                             int cellY = chunkMinY + ly;
                             var cell = chunk[lx, ly];
-                            if (cell == null)
+                            if (cell == null || cell.Count < 1)
                                 continue;
 
                             //----------------------------------------------------
@@ -297,21 +284,21 @@ namespace FourWinged.Grids.SpatialGrid
                             // 2) Distance-based culling logic:
                             //
                             //    d = distance(queryCenter, cellCenter)
-                            //    If (d + halfDiag < radius) => entire cell inside
+                            //    If (d + *halfDiag < radius) => entire cell inside
                             //    If (d > radius + halfDiag) => entire cell outside
                             //    else => partial => check per-object
                             //----------------------------------------------------
-                            float sqrDistToCenter = (cellCenter - center).sqrMagnitude;
+                            float distToCenter = (cellCenter - center).magnitude;
 
-                            if (sqrDistToCenter < (radius - _cellRadius) * (radius - _cellRadius))
+                            if (distToCenter <= (radius - _cellRadius)) //Query fully covers the whole cell
                             {
                                 _uniqueResults.UnionWith(cell);
                             }
-                            else if (sqrDistToCenter > (radius + _cellRadius) * (radius + _cellRadius))
+                            else if (distToCenter > (radius + _cellRadius)) //Query does not cover the cell at all
                             {
                                 // skip
                             }
-                            else
+                            else//Overlaps
                             {
                                 // Partial overlap => do per-object checks
                                 foreach (var obj in cell)

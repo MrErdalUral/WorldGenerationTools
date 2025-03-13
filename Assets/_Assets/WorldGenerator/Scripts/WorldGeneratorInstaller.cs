@@ -23,7 +23,7 @@ namespace FourWinged.WorldGenerator.Installers
             Random.InitState(0);
             Container.BindInstance(_worldGeneratorView).AsSingle();
 
-            Container.BindInstance(_poissonDiscSettings).AsSingle();
+            Container.BindInterfacesAndSelfTo<PoissonDiscSettings>().FromInstance(_poissonDiscSettings).AsSingle();
             Container.BindInterfacesAndSelfTo<GridObject2D.Factory>().AsSingle();
             Container.BindInterfacesAndSelfTo<SpatialGrid2D>()
                 .AsTransient()

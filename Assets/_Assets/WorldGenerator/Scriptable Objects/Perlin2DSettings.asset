@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Perlin2DSettings
   m_EditorClassIdentifier: 
   _seed: 0
-  _scale: 0.02
+  _scale: 0.05
   _octaves: 5
   _offset: {x: 0, y: 0}

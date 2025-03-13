@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   WorldSize: {x: 250, y: 250}
   MinimumHeight: -10
-  MaximumHeight: 10
+  MaximumHeight: 20

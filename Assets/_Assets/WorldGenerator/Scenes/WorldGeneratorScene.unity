@@ -261,6 +261,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _meshFilter: {fileID: 1664991912}
+  _drawNodeRadiuses: 0
 --- !u!23 &1664991911
 MeshRenderer:
   m_ObjectHideFlags: 0
