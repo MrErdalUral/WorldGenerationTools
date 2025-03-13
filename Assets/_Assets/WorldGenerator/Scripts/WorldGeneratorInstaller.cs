@@ -25,11 +25,11 @@ namespace FourWinged.WorldGenerator.Installers
 
             Container.BindInstance(_poissonDiscSettings).AsSingle();
             Container.BindInterfacesAndSelfTo<GridObject2D.Factory>().AsSingle();
-            Container.BindInterfacesAndSelfTo<SpatialGrid2D<IGridObject2D>>()
+            Container.BindInterfacesAndSelfTo<SpatialGrid2D>()
                 .AsTransient()
                 .WithArguments(_poissonDiscSettings.MaxRadius * 2, 16);
 
-            Container.BindInterfacesAndSelfTo<PoissonDiscGraphModel<IGridObject2D>>().AsSingle();
+            Container.BindInterfacesAndSelfTo<PoissonDiscSampler>().AsSingle();
 
             Container.BindInstance(_perlinNoiseSettings).AsSingle();
             Container.BindInterfacesAndSelfTo<PerlinNoise2D>().AsSingle();

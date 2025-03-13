@@ -6,19 +6,15 @@ using UnityEngine;
 namespace FourWinged.PoissonGraph.Settings
 {
     [CreateAssetMenu(fileName = "PoissonDiscSettings", menuName = "Poisson Disc/Settings")]
-    public class PoissonDiscSettings : ScriptableObject
+    public class PoissonDiscSettings : ScriptableObject,IPoissonDiscSettings
     {
-        public Vector2 RegionSize = new Vector2(10, 10);
-        public float MinY = 0f;
-        public float MaxY = 5f;
-        public float MinRadius = 0.5f;
-        public float MaxRadius = 1.5f;
-        public float MaxSlopeAngle = 30f;
-        public int NumSamplesBeforeRejection = 30;
-        public float VisualisationDelay = 0.1f;
-        public int NoiseIterations = 5;
-        
-        
+        [SerializeField]private Vector2 _regionSize = new Vector2(10, 10);
+        [SerializeField]private float _minRadius = 0.5f;
+        [SerializeField]private float _maxRadius = 1.5f;
+        [SerializeField]private int _numSamplesBeforeRejection = 30;
+        [SerializeField]private int _densitySamples = 5;
+        [SerializeField]private float _visualizationDelay = 0;
+
         public Subject<Unit> OnValuesChanged;
 
         void OnEnable()
@@ -31,5 +27,13 @@ namespace FourWinged.PoissonGraph.Settings
             if (Application.isPlaying)
                 OnValuesChanged.OnNext(Unit.Default);
         }
+
+        public Vector2 RegionSize => _regionSize;
+        public float MinRadius => _minRadius;
+        public float MaxRadius => _maxRadius;
+        public int NumSamplesBeforeRejection => _numSamplesBeforeRejection;
+        public int DensitySamples => _densitySamples;
+        public float VisualizationDelay => _visualizationDelay;
+
     }
 }

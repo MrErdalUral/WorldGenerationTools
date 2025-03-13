@@ -18,7 +18,7 @@ namespace FourWinged.WorldGenerator.Presenter
     public class WorldGeneratorPresenter : IInitializable, IDisposable
     {
         private readonly WorldGeneratorView _worldGeneratorView;
-        private readonly IGraphModel<IGridObject2D> _graphModel;
+        private readonly IPoissonDiscSampler _iPoissonDiscSampler;
         private readonly INoise2D _noise2D;
         private readonly WorldGenerationSettings _worldGenerationSettings;
         private readonly Mesh _mesh;
@@ -27,14 +27,14 @@ namespace FourWinged.WorldGenerator.Presenter
         private readonly List<Vector3> _vertices;
         private IMesh _delaunayMesh;
 
-        private NodeGraph<IGridObject2D> _nodeGraph => _graphModel.NodeGraph;
+        private NodeGraph<IGridObject2D> _nodeGraph => _iPoissonDiscSampler.NodeGraph;
 
         private DisposableBag _disposableBag;
 
-        public WorldGeneratorPresenter(WorldGeneratorView worldGeneratorView, IGraphModel<IGridObject2D> graphModel, INoise2D noise2D, WorldGenerationSettings worldGenerationSettings)
+        public WorldGeneratorPresenter(WorldGeneratorView worldGeneratorView, IPoissonDiscSampler iPoissonDiscSampler, INoise2D noise2D, WorldGenerationSettings worldGenerationSettings)
         {
             _worldGeneratorView = worldGeneratorView;
-            _graphModel = graphModel;
+            _iPoissonDiscSampler = iPoissonDiscSampler;
             _noise2D = noise2D;
             _worldGenerationSettings = worldGenerationSettings;
             _vertices = new List<Vector3>();
@@ -45,7 +45,7 @@ namespace FourWinged.WorldGenerator.Presenter
 
         public void Initialize()
         {
-            _graphModel.OnComplete.Subscribe(_ => CreateMesh()).AddTo(ref _disposableBag);
+            _iPoissonDiscSampler.OnComplete.Subscribe(_ => CreateMesh()).AddTo(ref _disposableBag);
             CreateMesh();
         }
 

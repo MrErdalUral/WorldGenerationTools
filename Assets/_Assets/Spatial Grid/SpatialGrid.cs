@@ -4,11 +4,11 @@ using UnityEngine;
 
 namespace FourWinged.Grids.SpatialGrid
 {
-    public class SpatialGrid<T> where T : IGridObject
+    public class SpatialGrid
     {
-        private readonly Dictionary<Vector3Int, HashSet<T>[,,]> _grid = new Dictionary<Vector3Int, HashSet<T>[,,]>();
-        private readonly HashSet<T> _uniqueResults = new HashSet<T>();
-        private readonly HashSet<T> _allObjects = new HashSet<T>();
+        private readonly Dictionary<Vector3Int, HashSet<IGridObject>[,,]> _grid = new Dictionary<Vector3Int, HashSet<IGridObject>[,,]>();
+        private readonly HashSet<IGridObject> _uniqueResults = new HashSet<IGridObject>();
+        private readonly HashSet<IGridObject> _allObjects = new HashSet<IGridObject>();
         private readonly int _chunkSize;
         private float _cellSize;
         private float _cellRadius;
@@ -19,7 +19,6 @@ namespace FourWinged.Grids.SpatialGrid
             _cellSize = cellSize;
             _chunkSize = chunkSize;
             _cellRadius = 0.5f * _cellSize * Mathf.Sqrt(3f);
-
         }
         /// <summary>
         /// Restructure cells with the new cellSize
@@ -43,7 +42,7 @@ namespace FourWinged.Grids.SpatialGrid
         /// Adds object to the grid cells
         /// </summary>
         /// <param name="obj"></param>
-        public void AddToGrid(T obj)
+        public void AddToGrid(IGridObject obj)
         {
             Vector3Int minCellPos = GetCellPosition(obj.BoundingBox.min);
             Vector3Int maxCellPos = GetCellPosition(obj.BoundingBox.max);
@@ -64,7 +63,7 @@ namespace FourWinged.Grids.SpatialGrid
         /// Remove object from grid cells.
         /// </summary>
         /// <param name="obj"></param>
-        public void RemoveFromGrid(T obj)
+        public void RemoveFromGrid(IGridObject obj)
         {
             Vector3Int minCellPos = GetCellPosition(obj.BoundingBox.min);
             Vector3Int maxCellPos = GetCellPosition(obj.BoundingBox.max);
@@ -89,7 +88,7 @@ namespace FourWinged.Grids.SpatialGrid
         /// </summary>
         /// <param name="obj"></param>
         /// <param name="displacement"></param>
-        public void Move(T obj, Vector3 displacement)
+        public void Move(IGridObject obj, Vector3 displacement)
         {
             Vector3Int prevMinCellPos = GetCellPosition(obj.BoundingBox.min - displacement);
             Vector3Int newMinCellPos = GetCellPosition(obj.BoundingBox.min);
@@ -267,7 +266,7 @@ namespace FourWinged.Grids.SpatialGrid
             return true;
         }
 
-        public void RadiusQuery(float radius, Vector3 center, List<T> resultList)
+        public void RadiusQuery(float radius, Vector3 center, List<IGridObject> resultList)
         {
             Bounds sphereBounds = new Bounds(center, Vector3.one * (2f * radius));
             Vector3Int minCellPos = GetCellPosition(sphereBounds.min);
@@ -399,7 +398,7 @@ namespace FourWinged.Grids.SpatialGrid
         /// </summary>
         /// <param name="box"></param>
         /// <param name="resultList"></param>
-        public void BoxQuery(Bounds box, List<T> resultList)
+        public void BoxQuery(Bounds box, List<IGridObject> resultList)
         {
             Vector3Int minCellPos = GetCellPosition(box.min);
             Vector3Int maxCellPos = GetCellPosition(box.max);
@@ -531,17 +530,17 @@ namespace FourWinged.Grids.SpatialGrid
                 (int)(pos.z / _cellSize) - (pos.z < 0 ? 1 : 0));
         }
 
-        private HashSet<T> CreateCell()
+        private HashSet<IGridObject> CreateCell()
         {
-            return new HashSet<T>();
+            return new HashSet<IGridObject>();
         }
 
-        private HashSet<T>[,,] CreateChunk()
+        private HashSet<IGridObject>[,,] CreateChunk()
         {
-            return new HashSet<T>[_chunkSize, _chunkSize, _chunkSize];
+            return new HashSet<IGridObject>[_chunkSize, _chunkSize, _chunkSize];
         }
 
-        private void AddToCell(T obj, int cellX, int cellY, int cellZ)
+        private void AddToCell(IGridObject obj, int cellX, int cellY, int cellZ)
         {
             var chunkPos = GetChunkPosition(cellX, cellY, cellZ);
             if (!_grid.TryGetValue(chunkPos, out var chunk))
@@ -563,7 +562,7 @@ namespace FourWinged.Grids.SpatialGrid
             cell.Add(obj);
         }
 
-        private void RemoveFromCell(T obj, int cellX, int cellY, int cellZ)
+        private void RemoveFromCell(IGridObject obj, int cellX, int cellY, int cellZ)
         {
             var chunkPos = GetChunkPosition(cellX, cellY, cellZ);
 

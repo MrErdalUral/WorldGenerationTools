@@ -12,25 +12,25 @@ using Random = UnityEngine.Random;
 
 namespace FourWinged.PoissonGraph
 {
-    public class PoissonDiscGraphModel<T> : IGraphModel<T>, IDisposable, IInitializable where T : IGridObject2D
+    public class PoissonDiscSampler : IPoissonDiscSampler, IDisposable, IInitializable
     {
-        private readonly IGridObjectFactory<T> _gridObjectFactory;
+        private readonly IGridObject2DFactory _gridObjectFactory;
         private readonly INoise2D _noise2d;
-        private readonly PoissonDiscSettings _settings;
+        private readonly IPoissonDiscSettings _settings;
         private readonly List<int> _activeSamples = new List<int>();
-        private readonly NodeGraph<T> _nodeGraph = new NodeGraph<T>();
-        private readonly SpatialGrid2D<T> _grid;
-        private readonly Subject<T> _onAddedNode = new Subject<T>();
-        private readonly Subject<NodeGraph<T>> _onComplete = new Subject<NodeGraph<T>>();
+        private readonly NodeGraph<IGridObject2D> _nodeGraph = new NodeGraph<IGridObject2D>();
+        private readonly SpatialGrid2D _grid;
+        private readonly Subject<IGridObject2D> _onAddedNode = new Subject<IGridObject2D>();
+        private readonly Subject<NodeGraph<IGridObject2D>> _onComplete = new Subject<NodeGraph<IGridObject2D>>();
 
         private DisposableBag _disposableBag;
 
-        public NodeGraph<T> NodeGraph => _nodeGraph;
-        public SpatialGrid2D<T> Grid => _grid;
-        public Subject<T> OnAddedNode => _onAddedNode;
-        public Subject<NodeGraph<T>> OnComplete => _onComplete;
+        public NodeGraph<IGridObject2D> NodeGraph => _nodeGraph;
+        public SpatialGrid2D Grid => _grid;
+        public Subject<IGridObject2D> OnAddedNode => _onAddedNode;
+        public Subject<NodeGraph<IGridObject2D>> OnComplete => _onComplete;
 
-        public PoissonDiscGraphModel(PoissonDiscSettings settings, SpatialGrid2D<T> grid, IGridObjectFactory<T> gridObjectFactory, INoise2D noise2d)
+        public PoissonDiscSampler(IPoissonDiscSettings settings, SpatialGrid2D grid, IGridObject2DFactory gridObjectFactory, INoise2D noise2d)
         {
             _settings = settings;
             _grid = grid;
@@ -40,20 +40,20 @@ namespace FourWinged.PoissonGraph
 
         public void Initialize()
         {
-            GenerateGraphAsync().Forget();
+            SamplePointsAsync().Forget();
         }
 
-        public async UniTask GenerateGraphAsync()
+        public async UniTask SamplePointsAsync()
         {
             var startTime = DateTimeOffset.Now;
             ClearCollections();
             float initialRadius = Mathf.Lerp(_settings.MinRadius, _settings.MaxRadius, _noise2d.GetValue(0, 0));
-            T initialNode = _gridObjectFactory.Create(Vector2.zero, initialRadius);
+            IGridObject2D initialNode = _gridObjectFactory.Create(Vector2.zero, initialRadius);
             AddNode(initialNode, 0);
-            if (_settings.VisualisationDelay >= 0)
+            if (_settings.VisualizationDelay >= 0)
             {
                 _onAddedNode.OnNext(initialNode);
-                await UniTask.WaitForSeconds(_settings.VisualisationDelay);
+                await UniTask.WaitForSeconds(_settings.VisualizationDelay);
             }
 
             while (_activeSamples.Count > 0)
@@ -65,9 +65,9 @@ namespace FourWinged.PoissonGraph
                 {
                     _nodeGraph.Edges.Add((nodeIndex, _nodeGraph.Nodes.Count));
                     AddNode(newNode, _nodeGraph.Nodes.Count);
-                    if (_settings.VisualisationDelay >= 0)
+                    if (_settings.VisualizationDelay >= 0)
                     {
-                        await UniTask.WaitForSeconds(_settings.VisualisationDelay);
+                        await UniTask.WaitForSeconds(_settings.VisualizationDelay);
                     }
                 }
                 else
@@ -80,7 +80,7 @@ namespace FourWinged.PoissonGraph
             Debug.Log("Generation time: " + (DateTimeOffset.Now - startTime).TotalSeconds);
         }
 
-        private void AddNode(T newNode, int index)
+        private void AddNode(IGridObject2D newNode, int index)
         {
             _nodeGraph.Nodes.Add(newNode);
             _activeSamples.Add(index);
@@ -88,7 +88,7 @@ namespace FourWinged.PoissonGraph
             _onAddedNode.OnNext(newNode);
         }
         
-        private bool TryGenerateNodeAroundAngle(T parentNode, out T newNode)
+        private bool TryGenerateNodeAroundAngle(IGridObject2D parentNode, out IGridObject2D newNode)
         {
             newNode = default;
             for (int i = 0; i < _settings.NumSamplesBeforeRejection; i++)
@@ -98,7 +98,7 @@ namespace FourWinged.PoissonGraph
                 float newRadius = _settings.MaxRadius;
                 float distance = parentNode.Radius + newRadius;
                 Vector2 newPosition = parentNode.Position2D + angleDirection * distance;
-                for (int n = 0; n < _settings.NoiseIterations; n++)
+                for (int n = 0; n < _settings.DensitySamples; n++)
                 {
                     newRadius = Mathf.Lerp(_settings.MinRadius, _settings.MaxRadius, _noise2d.GetValue(newPosition.x, newPosition.y));
                     distance = parentNode.Radius + newRadius;
