@@ -18,15 +18,14 @@ namespace FourWinged.PoissonGraph
         private readonly INoise2D _noise2d;
         private readonly IPoissonDiscSettings _settings;
         private readonly List<int> _activeSamples = new List<int>();
-        private readonly NodeGraph<IGridObject2D> _nodeGraph = new NodeGraph<IGridObject2D>();
         private readonly IGrid2D _grid;
+        private readonly NodeGraph<IGridObject2D> _nodeGraph = new NodeGraph<IGridObject2D>();
         private readonly Subject<IGridObject2D> _onAddedNode = new Subject<IGridObject2D>();
         private readonly Subject<NodeGraph<IGridObject2D>> _onComplete = new Subject<NodeGraph<IGridObject2D>>();
 
         private DisposableBag _disposableBag;
 
         public NodeGraph<IGridObject2D> NodeGraph => _nodeGraph;
-        public IGrid2D Grid => _grid;
         public Subject<IGridObject2D> OnAddedNode => _onAddedNode;
         public Subject<NodeGraph<IGridObject2D>> OnComplete => _onComplete;
 
@@ -61,7 +60,7 @@ namespace FourWinged.PoissonGraph
                 var activeIndex = Random.Range(0, _activeSamples.Count);
                 var nodeIndex = _activeSamples[activeIndex];
                 var sampleNode = _nodeGraph.Nodes[nodeIndex];
-                if (TryGenerateNodeAroundAngle(sampleNode, out var newNode))
+                if (TryGenerateNewNodeAroundParent(sampleNode, out var newNode))
                 {
                     _nodeGraph.Edges.Add((nodeIndex, _nodeGraph.Nodes.Count));
                     AddNode(newNode, _nodeGraph.Nodes.Count);
@@ -88,9 +87,9 @@ namespace FourWinged.PoissonGraph
             _onAddedNode.OnNext(newNode);
         }
         
-        private bool TryGenerateNodeAroundAngle(IGridObject2D parentNode, out IGridObject2D newNode)
+        private bool TryGenerateNewNodeAroundParent(IGridObject2D parentNode, out IGridObject2D newNode)
         {
-            newNode = default;
+            newNode = null;
             for (int i = 0; i < _settings.NumSamplesBeforeRejection; i++)
             {
                 float angle = Random.value * 360 * Mathf.Deg2Rad;

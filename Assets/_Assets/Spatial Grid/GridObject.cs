@@ -6,13 +6,8 @@ namespace FourWinged.Grids
 {
     public class GridObject : IGridObject
     {
-        public class Factory : IGridObjectFactory<IGridObject>
+        public class Factory : IGridObjectFactory
         {
-            public IGridObject Create(Vector2 position2D, float radius)
-            {
-                return new GridObject(position2D, radius);
-            }
-
             public IGridObject Create(Vector3 position, float radius)
             {
                 return new GridObject(position, radius);
