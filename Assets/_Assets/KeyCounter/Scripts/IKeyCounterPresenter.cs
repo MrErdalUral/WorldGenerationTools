@@ -1,4 +1,4 @@
-﻿namespace ClickCounter
+﻿namespace KeyCounter
 {
     public interface IClickCounterPresenter
     {

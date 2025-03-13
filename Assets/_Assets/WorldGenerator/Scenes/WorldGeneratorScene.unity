@@ -227,7 +227,7 @@ GameObject:
   - component: {fileID: 1664991912}
   - component: {fileID: 1664991911}
   m_Layer: 0
-  m_Name: GraphGeneratorView
+  m_Name: WorldGeneratorView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -261,9 +261,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _meshFilter: {fileID: 1664991912}
-  _showEdges: 0
-  _showNodes: 0
-  _showPerlinNoise: 0
 --- !u!23 &1664991911
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -391,7 +388,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 119716762e6247f8bb9c75ade04621a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _worldGeneratorView: {fileID: 1664991910}
   _poissonDiscSettings: {fileID: 11400000, guid: 9a01495b0415da749887ad51dbf06cf5, type: 2}
+  _perlinNoiseSettings: {fileID: 11400000, guid: dcbcf3224194fa44fb8e06e6a89ac4b3, type: 2}
+  _worldGenerationSettings: {fileID: 11400000, guid: 58ce42c8b8d82bf40aab9f7f6a58d5db, type: 2}
 --- !u!1 &1962892577
 GameObject:
   m_ObjectHideFlags: 0

@@ -10,8 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 8392426950615691473}
   - component: {fileID: 6656434201676812415}
+  - component: {fileID: 3727725754182197230}
   m_Layer: 0
-  m_Name: ClickCounterSceneContext
+  m_Name: KeyCounterSceneContext
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -24,13 +25,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2939094034440894632}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &6656434201676812415
 MonoBehaviour:
@@ -45,7 +46,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _scriptableObjectInstallers: []
-  _monoInstallers: []
+  _monoInstallers:
+  - {fileID: 3727725754182197230}
   _installerPrefabs: []
   _autoRun: 1
   OnPreInstall:
@@ -63,3 +65,17 @@ MonoBehaviour:
   _parentNewObjectsUnderSceneContext: 0
   _contractNames: []
   _parentContractNames: []
+--- !u!114 &3727725754182197230
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2939094034440894632}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b80f5c9e6b626ab49987e888f0f782a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _clickCounterParent: {fileID: 0}
+  _clickCounterViewPrefab: {fileID: 7015587569283871633, guid: a6dd736fe4d8d8141acdca0caa487f06, type: 3}

@@ -1,0 +1,37 @@
+﻿using UnityEngine;
+
+namespace RandomNoise
+{
+    public class PerlinNoise2D : INoise2D
+    {
+        private readonly Perlin2DSettings _settings;
+        private readonly Vector2[] _octaveOffsets;
+        public PerlinNoise2D(Perlin2DSettings settings)
+        {
+            _settings = settings;
+            _octaveOffsets = new Vector2[_settings.Octaves];
+            var random = new System.Random(_settings.Seed);
+            for (int o = 0; o < _octaveOffsets.Length; o++)
+            {
+                _octaveOffsets[o] = new Vector2(random.Next(int.MinValue, int.MaxValue) / (float)int.MaxValue, random.Next(int.MinValue, int.MaxValue) / (float)int.MaxValue) * 10000f;
+            }
+        }
+
+        public float GetValue(float x, float y)
+        {
+            if (_settings.Octaves < 1) return 0.5f;
+            float maxValue = 0;
+            float totalValue = 0;
+            for (int o = 0; o < _settings.Octaves; o++)
+            {
+                var octaveMagnitude = Mathf.Pow(2, o);
+                maxValue += octaveMagnitude;
+                totalValue += Mathf.PerlinNoise((x + _settings.Offset.x + _octaveOffsets[o].x) * _settings.Scale,
+                                  (y + _settings.Offset.y + _octaveOffsets[o].y) * _settings.Scale)
+                              * octaveMagnitude;
+            }
+
+            return totalValue / maxValue;
+        }
+    }
+}

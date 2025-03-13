@@ -33,7 +33,7 @@ namespace TriangleNet
     /// because it lies on a segment, or was not inserted because another vertex 
     /// occupies the same location.
     /// </remarks>
-    enum InsertVertexResult { Successful, Encroaching, Violating, Duplicate };
+    public enum InsertVertexResult { Successful, Encroaching, Violating, Duplicate };
 
     /// <summary>
     /// Labels that signify the result of direction finding.

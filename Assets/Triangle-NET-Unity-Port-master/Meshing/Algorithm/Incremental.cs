@@ -17,6 +17,7 @@ namespace TriangleNet.Meshing.Algorithm
     public class Incremental : ITriangulator
     {
         Mesh mesh;
+        private Otri _starttri;
 
         /// <summary>
         /// Form a Delaunay triangulation by incrementally inserting vertices.
@@ -28,16 +29,16 @@ namespace TriangleNet.Meshing.Algorithm
             this.mesh = new Mesh(config);
             this.mesh.TransferNodes(points);
 
-            Otri starttri = new Otri();
+            _starttri = new Otri();
 
             // Create a triangular bounding box.
             GetBoundingBox();
 
             foreach (var v in mesh.vertices.Values)
             {
-                starttri.tri = mesh.dummytri;
+                _starttri.tri = mesh.dummytri;
                 Osub tmp = default(Osub);
-                if (mesh.InsertVertex(v, ref starttri, ref tmp, false, false) == InsertVertexResult.Duplicate)
+                if (mesh.InsertVertex(v, ref _starttri, ref tmp, false, false) == InsertVertexResult.Duplicate)
                 {
                     if (Log.Verbose)
                     {
@@ -51,6 +52,29 @@ namespace TriangleNet.Meshing.Algorithm
 
             // Remove the bounding box.
             this.mesh.hullsize = RemoveBox();
+
+            return this.mesh;
+        }
+
+        public IMesh AddVertex(Vertex v)
+        {
+            mesh.AddNode(v);
+            _starttri = new Otri();
+            GetBoundingBox();
+            _starttri.tri = mesh.dummytri;
+            Osub tmp = default(Osub);
+            if (mesh.InsertVertex(v, ref _starttri, ref tmp, false, false) == InsertVertexResult.Duplicate)
+            {
+                if (Log.Verbose)
+                {
+                    Log.Instance.Warning("A duplicate vertex appeared and was ignored.",
+                        "Incremental.Triangulate()");
+                }
+                v.type = VertexType.UndeadVertex;
+                mesh.undeads++;
+            }
+            // Remove the bounding box.
+            //this.mesh.hullsize = RemoveBox();
 
             return this.mesh;
         }

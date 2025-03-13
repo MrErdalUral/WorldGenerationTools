@@ -12,14 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 031820bd02404daea819692a60c40e47, type: 3}
   m_Name: PoissonDiscSettings
   m_EditorClassIdentifier: 
-  RegionSize: {x: 100, y: 100}
+  RegionSize: {x: 250, y: 250}
   MinY: -50
   MaxY: 50
-  MinRadius: 0.1
-  MaxRadius: 1
+  MinRadius: 1
+  MaxRadius: 5
   MaxSlopeAngle: 30
-  NumSamplesBeforeRejection: 15
-  VisualisationDelay: -0.001
-  PerlinIterations: 5
-  PerlinScale: 0.2
-  PerlinOffset: {x: 0, y: 0}
+  NumSamplesBeforeRejection: 30
+  VisualisationDelay: -1
+  NoiseIterations: 15

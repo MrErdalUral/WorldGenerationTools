@@ -10,6 +10,8 @@ namespace TriangleNet.Meshing
     /// </summary>
     public interface IMesh
     {
+        InsertVertexResult InsertVertex(Vertex newvertex, ref Otri searchtri,
+            ref Osub splitseg, bool segmentflaws, bool triflaws);
         /// <summary>
         /// Gets the vertices of the mesh.
         /// </summary>

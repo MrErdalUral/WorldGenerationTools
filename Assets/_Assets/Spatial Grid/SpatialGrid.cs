@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace FourWinged.SpatialGrid
+namespace FourWinged.Grids.SpatialGrid
 {
     public class SpatialGrid<T> where T : IGridObject
     {
-        // 2D grid
-        //Another good candidate for the cells is LinkedList instead of HashSets. It provides slightly faster updates within the cells but worse for allocated memory 
         private readonly Dictionary<Vector3Int, HashSet<T>[,,]> _grid = new Dictionary<Vector3Int, HashSet<T>[,,]>();
         private readonly HashSet<T> _uniqueResults = new HashSet<T>();
         private readonly HashSet<T> _allObjects = new HashSet<T>();
@@ -251,8 +249,8 @@ namespace FourWinged.SpatialGrid
                                                 continue;
 
                                             // Use the object’s bounding sphere or a simpler center+radius check:
-                                            float distSq = (obj.BoundingPosition - center).sqrMagnitude;
-                                            float combinedRadius = obj.BoundingRadius + radius;
+                                            float distSq = (obj.Position - center).sqrMagnitude;
+                                            float combinedRadius = obj.Radius + radius;
                                             if (distSq <= combinedRadius * combinedRadius)
                                             {
                                                 return false;
@@ -369,8 +367,8 @@ namespace FourWinged.SpatialGrid
                                                 continue;
 
                                             // Use the object’s bounding sphere or a simpler center+radius check:
-                                            float distSq = (obj.BoundingPosition - center).sqrMagnitude;
-                                            float combinedRadius = obj.BoundingRadius + radius;
+                                            float distSq = (obj.Position - center).sqrMagnitude;
+                                            float combinedRadius = obj.Radius + radius;
                                             if (distSq <= combinedRadius * combinedRadius)
                                             {
                                                 _uniqueResults.Add(obj);
@@ -633,11 +631,4 @@ namespace FourWinged.SpatialGrid
         }
         #endregion
     }
-}
-
-public interface IGridObject
-{
-    Vector3 BoundingPosition { get; }
-    Bounds BoundingBox { get; }
-    float BoundingRadius { get; }
 }

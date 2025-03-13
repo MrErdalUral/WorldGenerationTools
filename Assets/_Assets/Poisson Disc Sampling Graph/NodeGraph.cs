@@ -3,17 +3,17 @@ using System.Collections.Generic;
 
 namespace FourWinged.PoissonGraph
 {
-    public class Graph : IDisposable
+    public class NodeGraph<T> : IDisposable
     {
-        private readonly List<GraphNode> _nodes;
+        private readonly List<T> _nodes;
         private readonly List <(int,int)> _edges;
 
-        public List <GraphNode> Nodes => _nodes;
+        public List <T> Nodes => _nodes;
         public List <(int,int)> Edges => _edges;
 
-        public Graph()
+        public NodeGraph()
         {
-            _nodes = new List<GraphNode>();
+            _nodes = new List<T>();
             _edges = new List<(int,int)>();
         }
 

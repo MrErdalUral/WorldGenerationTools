@@ -1,11 +1,11 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
+﻿using System;
+using UnityEngine;
 using TMPro;
 using Zenject;
 
-namespace ClickCounter
+namespace KeyCounter
 {
-    public class CounterView : MonoBehaviour, IPoolable<string, IMemoryPool>
+    public class CounterView : MonoBehaviour, IPoolable<string, IMemoryPool>, IDisposable
     {
         [SerializeField] private TMP_Text _counterText;
         private string _label;
@@ -18,23 +18,35 @@ namespace ClickCounter
 
         public int Count
         {
-            set { _counterText.text = $"{_label}: {value}"; }
+            set
+            {
+                {
+                    transform.SetAsFirstSibling();
+                    _counterText.text = $"{_label}: {value}";
+                }
+            }
         }
 
         public void OnDespawned()
         {
-            _pool.Despawn(this);
+            _pool = null;
         }
 
         public void OnSpawned(string label, IMemoryPool pool)
         {
             _label = label;
             _pool = pool;
+            transform.SetAsFirstSibling();
         }
 
         public class Factory : PlaceholderFactory<string, CounterView>
         {
 
+        }
+
+        public void Dispose()
+        {
+            _pool.Despawn(this);
         }
     }
 }

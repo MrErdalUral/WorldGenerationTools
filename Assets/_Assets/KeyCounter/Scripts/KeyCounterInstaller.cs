@@ -1,12 +1,10 @@
 using UnityEngine;
 using Zenject;
-using R3.Triggers;
-using R3.Collections;
 using R3;
 
-namespace ClickCounter
+namespace KeyCounter
 {
-    public class ClickCounterInstaller : MonoInstaller
+    public class KeyCounterInstaller : MonoInstaller
     {
         [SerializeField] private Transform _clickCounterParent;
         [SerializeField] private GameObject _clickCounterViewPrefab;
@@ -20,7 +18,7 @@ namespace ClickCounter
                     .FromComponentInNewPrefab(_clickCounterViewPrefab)
                     .UnderTransform(_clickCounterParent));
             Container.BindInstance(_disposables);
-            Container.BindInterfacesTo<ClickCounterPresenter>().AsSingle();
+            Container.BindInterfacesTo<KeyCounterPresenter>().AsSingle();
             Container.BindInterfacesTo<CounterModel>().AsSingle();
         }
     }

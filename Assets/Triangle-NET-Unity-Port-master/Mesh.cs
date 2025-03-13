@@ -451,6 +451,14 @@ namespace TriangleNet
             }
         }
 
+        internal void AddNode(Vertex p)
+        {
+            this.invertices++;
+            p.hash = p.id = hash_vtx++;
+            this.vertices.Add(p.hash, p);
+            this.bounds.Expand(p);
+        }
+
         /// <summary>
         /// Construct a mapping from vertices to triangles to improve the speed of 
         /// point location for segment insertion.
@@ -580,7 +588,7 @@ namespace TriangleNet
         /// checks for the creation of bad quality triangles. If bad triangles are 
         /// created, these are added to the queue if 'triflaws' is set.
         /// </remarks>
-        internal InsertVertexResult InsertVertex(Vertex newvertex, ref Otri searchtri,
+        public InsertVertexResult InsertVertex(Vertex newvertex, ref Otri searchtri,
             ref Osub splitseg, bool segmentflaws, bool triflaws)
         {
             Otri horiz = default(Otri);
@@ -813,7 +821,7 @@ namespace TriangleNet
                     flipstack.Push(horiz);
                 }
 
-                // Position 'horiz' on the first edge to check for
+                // Position2D 'horiz' on the first edge to check for
                 // the Delaunay property.
                 horiz.Lnext();
             }

@@ -16,9 +16,7 @@ namespace FourWinged.PoissonGraph.Settings
         public float MaxSlopeAngle = 30f;
         public int NumSamplesBeforeRejection = 30;
         public float VisualisationDelay = 0.1f;
-        public int PerlinIterations = 5;
-        public float PerlinScale = 0.001f;
-        public Vector2 PerlinOffset = new Vector2();
+        public int NoiseIterations = 5;
         
         
         public Subject<Unit> OnValuesChanged;
