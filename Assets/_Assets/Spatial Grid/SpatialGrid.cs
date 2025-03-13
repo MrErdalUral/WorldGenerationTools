@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace FourWinged.Grids.SpatialGrid
 {
-    public class SpatialGrid
+    public class SpatialGrid : IGrid
     {
         private readonly Dictionary<Vector3Int, HashSet<IGridObject>[,,]> _grid = new Dictionary<Vector3Int, HashSet<IGridObject>[,,]>();
         private readonly HashSet<IGridObject> _uniqueResults = new HashSet<IGridObject>();
@@ -88,7 +88,7 @@ namespace FourWinged.Grids.SpatialGrid
         /// </summary>
         /// <param name="obj"></param>
         /// <param name="displacement"></param>
-        public void Move(IGridObject obj, Vector3 displacement)
+        public void MoveObject(IGridObject obj, Vector3 displacement)
         {
             Vector3Int prevMinCellPos = GetCellPosition(obj.BoundingBox.min - displacement);
             Vector3Int newMinCellPos = GetCellPosition(obj.BoundingBox.min);

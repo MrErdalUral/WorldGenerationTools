@@ -19,18 +19,18 @@ namespace FourWinged.PoissonGraph
         private readonly IPoissonDiscSettings _settings;
         private readonly List<int> _activeSamples = new List<int>();
         private readonly NodeGraph<IGridObject2D> _nodeGraph = new NodeGraph<IGridObject2D>();
-        private readonly SpatialGrid2D _grid;
+        private readonly IGrid2D _grid;
         private readonly Subject<IGridObject2D> _onAddedNode = new Subject<IGridObject2D>();
         private readonly Subject<NodeGraph<IGridObject2D>> _onComplete = new Subject<NodeGraph<IGridObject2D>>();
 
         private DisposableBag _disposableBag;
 
         public NodeGraph<IGridObject2D> NodeGraph => _nodeGraph;
-        public SpatialGrid2D Grid => _grid;
+        public IGrid2D Grid => _grid;
         public Subject<IGridObject2D> OnAddedNode => _onAddedNode;
         public Subject<NodeGraph<IGridObject2D>> OnComplete => _onComplete;
 
-        public PoissonDiscSampler(IPoissonDiscSettings settings, SpatialGrid2D grid, IGridObject2DFactory gridObjectFactory, INoise2D noise2d)
+        public PoissonDiscSampler(IPoissonDiscSettings settings, IGrid2D grid, IGridObject2DFactory gridObjectFactory, INoise2D noise2d)
         {
             _settings = settings;
             _grid = grid;
