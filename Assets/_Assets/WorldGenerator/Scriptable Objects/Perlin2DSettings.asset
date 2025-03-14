@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc17b41bc1894814dace50d048139370, type: 3}
   m_Name: Perlin2DSettings
   m_EditorClassIdentifier: 
-  _seed: 0
-  _scale: 0.05
-  _octaves: 5
+  _seed: 1
+  _scale: 0.025
+  _octaves: 1
   _offset: {x: 0, y: 0}

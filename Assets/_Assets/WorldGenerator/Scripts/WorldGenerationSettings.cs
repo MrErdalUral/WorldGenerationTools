@@ -6,8 +6,9 @@ namespace FourWinged.WorldGenerator.Installers
 
     public class WorldGenerationSettings : ScriptableObject
     {
-        public Vector2 WorldSize;
-        public float MinimumHeight;
-        public float MaximumHeight;
+        public Vector2 WorldSize = new Vector2(100, 100);
+        public float MinimumHeight = 10;
+        public float MaximumHeight = -10;
+        public float MaxSlope = 10;
     }
 }

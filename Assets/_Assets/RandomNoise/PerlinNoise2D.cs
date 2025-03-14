@@ -1,14 +1,17 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace RandomNoise
 {
     public class PerlinNoise2D : INoise2D
     {
+        private readonly Dictionary<Vector2Int, float> _cache;
         private readonly Perlin2DSettings _settings;
         private readonly Vector2[] _octaveOffsets;
         public PerlinNoise2D(Perlin2DSettings settings)
         {
             _settings = settings;
+            _cache = new Dictionary<Vector2Int, float>();
             _octaveOffsets = new Vector2[_settings.Octaves];
             var random = new System.Random(_settings.Seed);
             for (int o = 0; o < _octaveOffsets.Length; o++)
@@ -30,8 +33,8 @@ namespace RandomNoise
                                   (y + _settings.Offset.y + _octaveOffsets[o].y) * _settings.Scale)
                               * octaveMagnitude;
             }
-
-            return totalValue / maxValue;
+            totalValue /= maxValue;
+            return totalValue;
         }
     }
 }

@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7733a2c157779314da310b3bfa50a098, type: 3}
   m_Name: WorldGenerationSettings
   m_EditorClassIdentifier: 
-  WorldSize: {x: 250, y: 250}
-  MinimumHeight: -10
-  MaximumHeight: 20
+  WorldSize: {x: 200, y: 200}
+  MinimumHeight: 0
+  MaximumHeight: 50
+  MaxSlope: 30
