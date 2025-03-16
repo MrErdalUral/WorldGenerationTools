@@ -3,7 +3,7 @@ using R3;
 using UnityEngine;
 
 
-namespace FourWinged.PoissonGraph.Settings
+namespace PoissonDiscSampling.Settings
 {
     [CreateAssetMenu(fileName = "PoissonDiscSettings", menuName = "Poisson Disc/Settings")]
     public class PoissonDiscSettings : ScriptableObject, IPoissonDiscSettings

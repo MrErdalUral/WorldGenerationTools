@@ -135,7 +135,7 @@ GameObject:
   - component: {fileID: 742155344}
   - component: {fileID: 742155343}
   m_Layer: 0
-  m_Name: Plane
+  m_Name: Water plane
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -320,7 +320,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1664991908
+--- !u!1 &1795650087
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -328,53 +328,46 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1664991909}
-  - component: {fileID: 1664991910}
-  - component: {fileID: 1664991912}
-  - component: {fileID: 1664991911}
+  - component: {fileID: 1795650091}
+  - component: {fileID: 1795650090}
+  - component: {fileID: 1795650089}
+  - component: {fileID: 1795650088}
   m_Layer: 0
-  m_Name: WorldGeneratorView
+  m_Name: Bottom plane
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1664991909
-Transform:
+--- !u!64 &1795650088
+MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1664991908}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1664991910
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1664991908}
+  m_GameObject: {fileID: 1795650087}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
   m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6bf1643cbf62f434f9037d8d2d542883, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _meshFilter: {fileID: 1664991912}
-  _drawNodeRadiuses: 0
---- !u!23 &1664991911
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!23 &1795650089
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1664991908}
+  m_GameObject: {fileID: 1795650087}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -410,14 +403,29 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!33 &1664991912
+--- !u!33 &1795650090
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1664991908}
-  m_Mesh: {fileID: 0}
+  m_GameObject: {fileID: 1795650087}
+  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!4 &1795650091
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1795650087}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 100, y: 1, z: 100}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1953264111
 GameObject:
   m_ObjectHideFlags: 0
@@ -495,10 +503,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 119716762e6247f8bb9c75ade04621a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _worldGeneratorView: {fileID: 1664991910}
+  _islandViewPrefab: {fileID: 2659500800226071524, guid: 41e5b69cc3847b440aa1c1ec1e43c616, type: 3}
   _poissonDiscSettings: {fileID: 11400000, guid: 9a01495b0415da749887ad51dbf06cf5, type: 2}
   _perlinNoiseSettings: {fileID: 11400000, guid: dcbcf3224194fa44fb8e06e6a89ac4b3, type: 2}
-  _worldGenerationSettings: {fileID: 11400000, guid: 58ce42c8b8d82bf40aab9f7f6a58d5db, type: 2}
+  _islandGenerationSettings: {fileID: 11400000, guid: 58ce42c8b8d82bf40aab9f7f6a58d5db, type: 2}
 --- !u!1 &1962892577
 GameObject:
   m_ObjectHideFlags: 0
@@ -600,5 +608,5 @@ SceneRoots:
   - {fileID: 1953264113}
   - {fileID: 1161530934}
   - {fileID: 1962892579}
-  - {fileID: 1664991909}
   - {fileID: 742155346}
+  - {fileID: 1795650091}

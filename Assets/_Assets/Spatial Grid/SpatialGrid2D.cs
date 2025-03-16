@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace FourWinged.Grids.SpatialGrid
+namespace Grids.SpatialGrid
 {
     public class SpatialGrid2D : IGrid2D
     {

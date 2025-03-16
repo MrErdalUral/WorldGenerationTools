@@ -1,7 +1,7 @@
-﻿using FourWinged.Grids;
+﻿using Grids;
 using UnityEngine;
 
-namespace FourWinged.Grids
+namespace Grids
 {
     public readonly struct GridObject2D : IGridObject2D
     {

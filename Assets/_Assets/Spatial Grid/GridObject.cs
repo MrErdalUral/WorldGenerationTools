@@ -1,8 +1,8 @@
 ﻿using System;
-using FourWinged.Grids;
+using Grids;
 using UnityEngine;
 
-namespace FourWinged.Grids
+namespace Grids
 {
     public class GridObject : IGridObject
     {

@@ -9,10 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7733a2c157779314da310b3bfa50a098, type: 3}
-  m_Name: WorldGenerationSettings
+  m_Script: {fileID: 11500000, guid: cc17b41bc1894814dace50d048139370, type: 3}
+  m_Name: Perlin2DSettings
   m_EditorClassIdentifier: 
-  WorldSize: {x: 200, y: 200}
-  MinimumHeight: 0
-  MaximumHeight: 50
-  MaxSlope: 30
+  _seed: 3
+  _scale: 0.025
+  _octaves: 1
+  _offset: {x: 0, y: 0}

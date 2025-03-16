@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace FourWinged.PoissonGraph.Settings
+namespace PoissonDiscSampling.Settings
 {
     public interface IPoissonDiscSettings
     {

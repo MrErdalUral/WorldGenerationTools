@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace FourWinged.Grids.SpatialGrid
+namespace Grids.SpatialGrid
 {
     public interface IGrid
     {

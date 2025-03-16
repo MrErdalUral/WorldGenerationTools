@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace FourWinged.PoissonGraph
+namespace PoissonDiscSampling
 {
     public class NodeGraph<T> : IDisposable
     {

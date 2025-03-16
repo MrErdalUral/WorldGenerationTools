@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace FourWinged.Grids
+namespace Grids
 {
     public interface IGridObject2D
     {
