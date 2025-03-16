@@ -13,8 +13,8 @@ namespace IslandGenerator
 {
     public class IslandGenerator : IIslandGenerator
     {
-        public readonly IPoissonDiscSampler _poissonDiscSampler;
-        public readonly INoise2D _noise2D;
+        private readonly IPoissonDiscSampler _poissonDiscSampler;
+        private readonly INoise2D _noise2D;
         private readonly ConstraintOptions _options;
         private Polygon _polygon;
        
@@ -52,7 +52,11 @@ namespace IslandGenerator
             return island;
         }
 
-
+        /// <summary>
+        /// Calculates height by using noise values as slope between nodes.
+        /// </summary>
+        /// <param name="vertices"></param>
+        /// <param name="settings"></param>
         private void GenerateHeights(List<Vector3> vertices, IIslandGenerationSettings settings)
         {
             var v = vertices[0];

@@ -74,15 +74,18 @@ namespace PoissonDiscSampling
             {
                 float angle = Random.value * 360 * Mathf.Deg2Rad;
                 var angleDirection = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
-                float newRadius = settings.MaxRadius;
+                float newRadius = _noise2d.GetValue(parentNode.Position2D.x,parentNode.Position2D.y);
+                newRadius = 4 * newRadius * (1 - newRadius);
                 float distance = parentNode.Radius + newRadius;
                 Vector2 newPosition = parentNode.Position2D + angleDirection * distance;
-                for (int n = 0; n < settings.DensitySamples; n++)
-                {
-                    newRadius = Mathf.Lerp(settings.MinRadius, settings.MaxRadius, _noise2d.GetValue(newPosition.x, newPosition.y));
-                    distance = parentNode.Radius + newRadius;
-                    newPosition = parentNode.Position2D + angleDirection * distance;
-                }
+                //for (int n = 0; n < settings.DensitySamples; n++)
+                //{
+                //    var noiseValue = _noise2d.GetValue(newPosition.x, newPosition.y);
+                   
+                //    newRadius = Mathf.Lerp(settings.MinRadius, settings.MaxRadius, noiseValue);
+                //    distance = parentNode.Radius + newRadius;
+                //    newPosition = parentNode.Position2D + angleDirection * distance;
+                //}
                 var isValid = IsValid(settings, newPosition, newRadius);
                 if (isValid)
                 {

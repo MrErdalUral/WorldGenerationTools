@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _seed: 3
   _scale: 0.025
-  _octaves: 1
+  _octaves: 2
   _offset: {x: 0, y: 0}
