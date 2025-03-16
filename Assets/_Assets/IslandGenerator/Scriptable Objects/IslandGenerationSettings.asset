@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7733a2c157779314da310b3bfa50a098, type: 3}
   m_Name: IslandGenerationSettings
   m_EditorClassIdentifier: 
-  WorldSize: {x: 200, y: 200}
-  MinimumHeight: 0
-  MaximumHeight: 50
-  MaxSlope: 30
-  PoissonSettings: {fileID: 11400000, guid: 9a01495b0415da749887ad51dbf06cf5, type: 2}
+  _islandMaterial: {fileID: 2100000, guid: abcf91c4f21040046bdfac4d4dd9776e, type: 2}
+  _worldSize: {x: 200, y: 200}
+  _minimumHeight: 0
+  _maximumHeight: 50
+  _maxSlope: 30
+  _poissonSettings: {fileID: 11400000, guid: 9a01495b0415da749887ad51dbf06cf5, type: 2}

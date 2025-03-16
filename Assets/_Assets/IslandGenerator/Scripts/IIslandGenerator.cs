@@ -1,5 +1,6 @@
 ﻿using Cysharp.Threading.Tasks;
 using IslandGenerator.Installers;
+using IslandGenerator.Settings;
 using R3;
 using UnityEngine;
 
@@ -7,7 +8,6 @@ namespace IslandGenerator
 {
     public interface IIslandGenerator
     {
-        UniTask<IslandDto> GenerateIsland(IslandGenerationSettings settings);
-        Subject<IslandDto> OnIslandGenerated { get; }
+        IslandDto GenerateIsland(IIslandGenerationSettings settings, int? overrideSeed = null);
     }
 }

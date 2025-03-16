@@ -19,14 +19,8 @@ namespace PoissonDiscSampling
         private readonly List<int> _activeSamples = new List<int>();
         private readonly IGrid2D _grid;
         private readonly NodeGraph<IGridObject2D> _nodeGraph = new NodeGraph<IGridObject2D>();
-        private readonly Subject<IGridObject2D> _onAddedNode = new Subject<IGridObject2D>();
-        private readonly Subject<NodeGraph<IGridObject2D>> _onComplete = new Subject<NodeGraph<IGridObject2D>>();
-
-        private DisposableBag _disposableBag;
 
         public NodeGraph<IGridObject2D> NodeGraph => _nodeGraph;
-        public Subject<IGridObject2D> OnAddedNode => _onAddedNode;
-        public Subject<NodeGraph<IGridObject2D>> OnComplete => _onComplete;
 
         public PoissonDiscSampler(IGrid2D grid, IGridObject2DFactory gridObjectFactory, INoise2D noise2d)
         {
@@ -35,19 +29,14 @@ namespace PoissonDiscSampling
             _noise2d = noise2d;
         }
 
-        public async UniTask<NodeGraph<IGridObject2D>> SamplePointsAsync(IPoissonDiscSettings settings)
+        public NodeGraph<IGridObject2D> SamplePointsAsync(IPoissonDiscSettings settings)
         {
             var startTime = DateTimeOffset.Now;
             ClearCollections();
             float initialRadius = Mathf.Lerp(settings.MinRadius, settings.MaxRadius, _noise2d.GetValue(0, 0));
             IGridObject2D initialNode = _gridObjectFactory.Create(Vector2.zero, initialRadius);
             AddNode(initialNode, 0);
-            if (settings.VisualizationDelay >= 0)
-            {
-                _onAddedNode.OnNext(initialNode);
-                await UniTask.WaitForSeconds(settings.VisualizationDelay);
-            }
-
+            
             while (_activeSamples.Count > 0)
             {
                 var activeIndex = Random.Range(0, _activeSamples.Count);
@@ -57,10 +46,6 @@ namespace PoissonDiscSampling
                 {
                     _nodeGraph.Edges.Add((nodeIndex, _nodeGraph.Nodes.Count));
                     AddNode(newNode, _nodeGraph.Nodes.Count);
-                    if (settings.VisualizationDelay >= 0)
-                    {
-                        await UniTask.WaitForSeconds(settings.VisualizationDelay);
-                    }
                 }
                 else
                 {
@@ -70,7 +55,6 @@ namespace PoissonDiscSampling
             Debug.Log("Generated graph: " + _nodeGraph.Nodes.Count + " nodes");
             Debug.Log("Generation time: " + (DateTimeOffset.Now - startTime).TotalSeconds);
 
-            _onComplete.OnNext(_nodeGraph);
             return _nodeGraph;
 
         }
@@ -80,7 +64,6 @@ namespace PoissonDiscSampling
             _nodeGraph.Nodes.Add(newNode);
             _activeSamples.Add(index);
             _grid.AddToGrid(newNode);
-            _onAddedNode.OnNext(newNode);
         }
         
         private bool TryGenerateNewNodeAroundParent(IPoissonDiscSettings settings, IGridObject2D parentNode,
@@ -123,12 +106,12 @@ namespace PoissonDiscSampling
 
         public void Dispose()
         {
-            _disposableBag.Dispose();
             ClearCollections();
         }
 
         private void ClearCollections()
         {
+            _grid.Clear();
             _activeSamples.Clear();
             _nodeGraph.Dispose();
         }

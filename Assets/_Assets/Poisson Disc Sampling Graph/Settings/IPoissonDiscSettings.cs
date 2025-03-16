@@ -9,6 +9,5 @@ namespace PoissonDiscSampling.Settings
         float MaxRadius { get;}
         int NumSamplesBeforeRejection { get;}
         int DensitySamples { get; }
-        float VisualizationDelay { get; }
     }
 }

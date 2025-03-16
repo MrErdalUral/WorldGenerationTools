@@ -13,8 +13,7 @@ MonoBehaviour:
   m_Name: PoissonDiscSettings
   m_EditorClassIdentifier: 
   _regionSize: {x: 200, y: 200}
-  _minRadius: 0.1
+  _minRadius: 0.2
   _maxRadius: 1
   _numSamplesBeforeRejection: 30
   _densitySamples: 5
-  _visualizationDelay: -1

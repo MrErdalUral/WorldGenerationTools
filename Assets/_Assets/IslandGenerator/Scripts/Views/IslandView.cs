@@ -24,7 +24,7 @@ namespace IslandGenerator.View
         public void OnSpawned(IslandDto islandDto, IMemoryPool pool)
         {
             _pool = pool;
-            if (_mesh == null) _mesh = new Mesh();
+            _mesh = new Mesh();
             _mesh.SetVertices(islandDto.IslandVertices);
             _mesh.SetTriangles(islandDto.IslandTriangles, 0);
             _mesh.RecalculateNormals();

@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Grids;
-using IslandGenerator.Installers;
+using IslandGenerator.Settings;
 using PoissonDiscSampling;
 using R3;
 using RandomNoise;
@@ -19,38 +15,32 @@ namespace IslandGenerator
     {
         public readonly IPoissonDiscSampler _poissonDiscSampler;
         public readonly INoise2D _noise2D;
-        private readonly Polygon _polygon;
         private readonly ConstraintOptions _options;
-        private IMesh _delaunayMesh;
-        private Subject<IslandDto> _island = new Subject<IslandDto>();
-
-        public Subject<IslandDto> OnIslandGenerated => _island;
-
-
+        private Polygon _polygon;
+       
         public IslandGenerator(IPoissonDiscSampler poissonDiscSampler, INoise2D noise2D)
         {
             _poissonDiscSampler = poissonDiscSampler;
             _noise2D = noise2D;
-            _polygon = new Polygon();
             _options = new ConstraintOptions() { ConformingDelaunay = true };
-
         }
 
-        public async UniTask<IslandDto> GenerateIsland(IslandGenerationSettings settings)
+        public IslandDto GenerateIsland(IIslandGenerationSettings settings, int? overrideSeed = null)
         {
-            var nodeGraph = await _poissonDiscSampler.SamplePointsAsync(settings.PoissonSettings);
+            _noise2D.SetSeed(overrideSeed ?? settings.Seed);
+            var nodeGraph = _poissonDiscSampler.SamplePointsAsync(settings.PoissonDiscSettings);
 
-            CreateTriangleMesh(nodeGraph.Nodes);
+            var iMesh = CreateTriangleMesh(nodeGraph.Nodes);
             var vertices = new List<Vector3>();
-            foreach (var vertex in _delaunayMesh.Vertices)
+            foreach (var vertex in iMesh.Vertices)
             {
                 vertices.Add(new Vector3((float)vertex.X, 0, (float)vertex.Y));
             }
             GenerateHeights(vertices, settings);
 
-            var tris = new int[_delaunayMesh.Triangles.Count * 3];
+            var tris = new int[iMesh.Triangles.Count * 3];
             int i = 0;
-            foreach (var meshTriangle in _delaunayMesh.Triangles)
+            foreach (var meshTriangle in iMesh.Triangles)
             {
                 tris[i] = meshTriangle.GetVertexID(0);
                 tris[i + 1] = meshTriangle.GetVertexID(2);
@@ -59,12 +49,11 @@ namespace IslandGenerator
             }
 
             var island = new IslandDto(vertices, nodeGraph.Edges, tris);
-            OnIslandGenerated.OnNext(island);
             return island;
         }
 
 
-        private void GenerateHeights(List<Vector3> vertices, IslandGenerationSettings settings)
+        private void GenerateHeights(List<Vector3> vertices, IIslandGenerationSettings settings)
         {
             var v = vertices[0];
             v.y = (settings.MinimumHeight + settings.MaximumHeight) * 0.5f;
@@ -88,14 +77,15 @@ namespace IslandGenerator
             }
         }
 
-        private void CreateTriangleMesh(List<IGridObject2D> nodes)
+        private IMesh CreateTriangleMesh(List<IGridObject2D> nodes)
         {
-            if (nodes.Count < 3) return;
+            if (nodes.Count < 3) return null;
+            _polygon = new Polygon();
             foreach (var node in nodes)
             {
                 _polygon.Add(new Vertex(node.Position2D.x, node.Position2D.y));
             }
-            _delaunayMesh = _polygon.Triangulate(_options);
+            return _polygon.Triangulate(_options);
         }
 
 
