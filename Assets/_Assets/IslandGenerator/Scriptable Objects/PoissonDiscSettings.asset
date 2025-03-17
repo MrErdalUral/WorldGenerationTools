@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 031820bd02404daea819692a60c40e47, type: 3}
   m_Name: PoissonDiscSettings
   m_EditorClassIdentifier: 
-  _regionSize: {x: 200, y: 200}
-  _minRadius: 0.2
+  _regionSize: {x: 100, y: 100}
+  _minRadius: 0.1
   _maxRadius: 1
   _numSamplesBeforeRejection: 30
-  _densitySamples: 5
+  _numberOfRoots: 5

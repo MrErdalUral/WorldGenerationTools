@@ -17,7 +17,7 @@ namespace IslandGenerator
         private readonly INoise2D _noise2D;
         private readonly ConstraintOptions _options;
         private Polygon _polygon;
-       
+
         public IslandGenerator(IPoissonDiscSampler poissonDiscSampler, INoise2D noise2D)
         {
             _poissonDiscSampler = poissonDiscSampler;
@@ -36,7 +36,7 @@ namespace IslandGenerator
             {
                 vertices.Add(new Vector3((float)vertex.X, 0, (float)vertex.Y));
             }
-            GenerateHeights(vertices, settings);
+            GenerateHeights(nodeGraph, vertices, settings);
 
             var tris = new int[iMesh.Triangles.Count * 3];
             int i = 0;
@@ -55,14 +55,21 @@ namespace IslandGenerator
         /// <summary>
         /// Calculates height by using noise values as slope between nodes.
         /// </summary>
+        /// <param name="nodeGraph"></param>
         /// <param name="vertices"></param>
         /// <param name="settings"></param>
-        private void GenerateHeights(List<Vector3> vertices, IIslandGenerationSettings settings)
+        private void GenerateHeights(NodeGraph<IGridObject2D> nodeGraph, List<Vector3> vertices,
+            IIslandGenerationSettings settings)
         {
-            var v = vertices[0];
-            v.y = (settings.MinimumHeight + settings.MaximumHeight) * 0.5f;
-            vertices[0] = v;
-            foreach (var nodeGraphEdge in _poissonDiscSampler.NodeGraph.Edges)
+            var sigma = settings.HeightFalloffSigma;
+            foreach (var rootIndex in nodeGraph.Roots)
+            {
+                var v = vertices[rootIndex];
+                v.y = (settings.MinimumHeight + settings.MaximumHeight) * 0.5f *
+                      Mathf.Exp(-new Vector2(v.x / settings.WorldSize.x, v.z / settings.WorldSize.y).sqrMagnitude / (2f * sigma * sigma));
+                vertices[rootIndex] = v;
+            }
+            foreach (var nodeGraphEdge in nodeGraph.Edges)
             {
                 var v1Index = nodeGraphEdge.Item1;
                 var v2Index = nodeGraphEdge.Item2;
@@ -73,7 +80,6 @@ namespace IslandGenerator
                 var p = _noise2D.GetValue(v2.x, v2.z);
                 var angle = Mathf.Deg2Rad * Mathf.Lerp(-settings.MaxSlope, settings.MaxSlope, p);
                 v2.y = v1.y + Mathf.Tan(angle) * d;
-                var sigma = 1;
                 var exponent = -new Vector2(v2.x / settings.WorldSize.x, v2.z / settings.WorldSize.y).sqrMagnitude / (2 * sigma * sigma);
                 v2.y *= Mathf.Exp(exponent);
                 v2.y = Mathf.Clamp(v2.y, settings.MinimumHeight, settings.MaximumHeight);

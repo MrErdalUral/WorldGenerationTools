@@ -33,10 +33,20 @@ namespace PoissonDiscSampling
         {
             var startTime = DateTimeOffset.Now;
             ClearCollections();
-            float initialRadius = Mathf.Lerp(settings.MinRadius, settings.MaxRadius, _noise2d.GetValue(0, 0));
-            IGridObject2D initialNode = _gridObjectFactory.Create(Vector2.zero, initialRadius);
-            AddNode(initialNode, 0);
-            
+
+            for (int i = 0; i < settings.NumberOfRoots; i++)
+            {
+                var position2D = Vector2.Scale(Random.insideUnitCircle, settings.RegionSize / 4);
+                float initialRadius = Mathf.Lerp(settings.MinRadius, settings.MaxRadius, _noise2d.GetValue(position2D.x, position2D.y));
+                while (!IsValid(settings, position2D, initialRadius))
+                {
+                    position2D = Vector2.Scale(Random.insideUnitCircle, settings.RegionSize / 4);
+                    initialRadius = Mathf.Lerp(settings.MinRadius, settings.MaxRadius, _noise2d.GetValue(position2D.x, position2D.y));
+                }
+                IGridObject2D initialNode = _gridObjectFactory.Create(position2D, initialRadius);
+                AddNode(initialNode, i, true);
+            }
+
             while (_activeSamples.Count > 0)
             {
                 var activeIndex = Random.Range(0, _activeSamples.Count);
@@ -59,13 +69,16 @@ namespace PoissonDiscSampling
 
         }
 
-        private void AddNode(IGridObject2D newNode, int index)
+        private void AddNode(IGridObject2D newNode, int index, bool isRoot = false)
         {
             _nodeGraph.Nodes.Add(newNode);
+            if (isRoot)
+                _nodeGraph.Roots.Add(index);
             _activeSamples.Add(index);
             _grid.AddToGrid(newNode);
+
         }
-        
+
         private bool TryGenerateNewNodeAroundParent(IPoissonDiscSettings settings, IGridObject2D parentNode,
             out IGridObject2D newNode)
         {
@@ -74,18 +87,11 @@ namespace PoissonDiscSampling
             {
                 float angle = Random.value * 360 * Mathf.Deg2Rad;
                 var angleDirection = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
-                float newRadius = _noise2d.GetValue(parentNode.Position2D.x,parentNode.Position2D.y);
-                newRadius = 4 * newRadius * (1 - newRadius);
+                float noise = _noise2d.GetValue(parentNode.Position2D.x, parentNode.Position2D.y);
+                var parabolicNoise = 4 * noise * (1 - noise);
+                float newRadius = Mathf.Lerp(settings.MinRadius, settings.MaxRadius, parabolicNoise);
                 float distance = parentNode.Radius + newRadius;
                 Vector2 newPosition = parentNode.Position2D + angleDirection * distance;
-                //for (int n = 0; n < settings.DensitySamples; n++)
-                //{
-                //    var noiseValue = _noise2d.GetValue(newPosition.x, newPosition.y);
-                   
-                //    newRadius = Mathf.Lerp(settings.MinRadius, settings.MaxRadius, noiseValue);
-                //    distance = parentNode.Radius + newRadius;
-                //    newPosition = parentNode.Position2D + angleDirection * distance;
-                //}
                 var isValid = IsValid(settings, newPosition, newRadius);
                 if (isValid)
                 {

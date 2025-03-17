@@ -12,5 +12,6 @@ namespace IslandGenerator.Settings
         float MaximumHeight { get; }
         float MaxSlope { get; }
         IPoissonDiscSettings PoissonDiscSettings { get; }
+        float HeightFalloffSigma { get; }
     }
 }

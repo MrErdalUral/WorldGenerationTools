@@ -8,6 +8,6 @@ namespace PoissonDiscSampling.Settings
         float MinRadius { get;}
         float MaxRadius { get;}
         int NumSamplesBeforeRejection { get;}
-        int DensitySamples { get; }
+        int NumberOfRoots { get; }
     }
 }

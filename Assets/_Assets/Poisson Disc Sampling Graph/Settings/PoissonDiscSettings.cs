@@ -12,7 +12,7 @@ namespace PoissonDiscSampling.Settings
         [SerializeField]private float _minRadius = 0.5f;
         [SerializeField]private float _maxRadius = 1.5f;
         [SerializeField]private int _numSamplesBeforeRejection = 30;
-        [SerializeField]private int _densitySamples = 5;
+        [SerializeField] [Range(1, 5)] private int _numberOfRoots;
 
         public Subject<Unit> OnValuesChanged;
 
@@ -31,6 +31,6 @@ namespace PoissonDiscSampling.Settings
         public float MinRadius => _minRadius;
         public float MaxRadius => _maxRadius;
         public int NumSamplesBeforeRejection => _numSamplesBeforeRejection;
-        public int DensitySamples => _densitySamples;
+        public int NumberOfRoots => _numberOfRoots;
     }
 }

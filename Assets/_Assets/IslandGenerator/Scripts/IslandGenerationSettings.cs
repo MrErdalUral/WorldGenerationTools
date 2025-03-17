@@ -17,6 +17,7 @@ namespace IslandGenerator.Settings
         private float _maximumHeight = 30;
         [SerializeField] private float _maxSlope = 10;
         [SerializeField] private PoissonDiscSettings _poissonSettings;
+        [SerializeField] private float _heightFalloffSigma = 1;
 
         public int Seed => _seed;
         public Material IslandMaterial => _islandMaterial;
@@ -25,5 +26,6 @@ namespace IslandGenerator.Settings
         public float MaximumHeight => _maximumHeight;
         public float MaxSlope => _maxSlope;
         public IPoissonDiscSettings PoissonDiscSettings => _poissonSettings;
+        public float HeightFalloffSigma => _heightFalloffSigma;
     }
 }
