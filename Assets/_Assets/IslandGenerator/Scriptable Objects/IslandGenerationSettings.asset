@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _seed: 0
   _islandMaterial: {fileID: 2100000, guid: abcf91c4f21040046bdfac4d4dd9776e, type: 2}
-  _worldSize: {x: 100, y: 100}
+  _worldSize: {x: 200, y: 200}
   _minimumHeight: 0
   _maximumHeight: 50
   _maxSlope: 30
   _poissonSettings: {fileID: 11400000, guid: 9a01495b0415da749887ad51dbf06cf5, type: 2}
-  _heightFalloffSigma: 1
+  _heightFalloffSigma: 0.9
