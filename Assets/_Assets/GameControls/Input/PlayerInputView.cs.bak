@@ -1,0 +1,54 @@
+using System.Collections;
+using System.Collections.Generic;
+using R3;
+using UnityEngine;
+using UnityEngine.UI;
+
+namespace GameControls.PlayerInput
+{
+    public class PlayerInputView : MonoBehaviour, IPlayerInputView, IRandomizeButtonInputView
+    {
+        private readonly Dictionary<KeyCode, Observable<Unit>> _keyDownSubjects = new Dictionary<KeyCode, Observable<Unit>>();
+        [SerializeField] private Button _randomizeButton;
+        private Vector2 _mousePosition;
+
+        public ReactiveProperty<Vector3> CameraInput { get; } = new ReactiveProperty<Vector3>();
+        public Observable<Unit> RandomizeButtonClicked => _randomizeButton.OnClickAsObservable();
+
+        // Update is called once per frame
+        void Update()
+        {
+            var input = new Vector3();
+            if (Input.GetMouseButton(0))
+                input = (Input.mousePosition - (Vector3) _mousePosition) * Time.deltaTime;
+            input += Input.mouseScrollDelta.y * Time.deltaTime * Vector3.forward;
+            input.x += Input.GetAxisRaw("Horizontal");
+            input.y += Input.GetAxisRaw("Vertical");
+            CameraInput.Value = input;
+			if(input.sqrMagnitude != 0)
+				CameraInput.ForceNotify();
+            _mousePosition = Input.mousePosition;
+        }
+
+        public Observable<Unit> GetOrCreateKeyDownObservable(KeyCode key)
+        {
+            if (_keyDownSubjects.TryGetValue(key, out var subject)) return subject;
+
+            subject = Observable.EveryUpdate().Where(_ => Input.GetKeyDown(key)); 
+            _keyDownSubjects.Add(key,subject);
+            return subject;
+        }
+
+    }
+
+    public interface IPlayerInputView
+    {
+        ReactiveProperty<Vector3> CameraInput { get; }
+        Observable<Unit> GetOrCreateKeyDownObservable(KeyCode key);
+    }
+
+    public interface IRandomizeButtonInputView
+    {
+        Observable<Unit> RandomizeButtonClicked { get; }
+    }
+}

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Camera))]
-public class PlanarReflection : MonoBehaviour
+public class CameraGraphicsView : MonoBehaviour
 {
     [SerializeField] private Transform _reflectionPlane;
     [SerializeField] private Material _material;
@@ -26,7 +26,8 @@ public class PlanarReflection : MonoBehaviour
         _reflectionCamera.enabled = false;
 
         // Create the reflection texture
-        _reflectionRenderTarget = new RenderTexture(Screen.width, Screen.height, 0);
+        _reflectionRenderTarget = new RenderTexture(Screen.width/2, Screen.height/2, 0);
+        _reflectionRenderTarget.filterMode = FilterMode.Point;
     }
 
     void OnPreRender()
@@ -100,5 +101,13 @@ public class PlanarReflection : MonoBehaviour
                            cnormal.y * sideSign,
                            cnormal.z * sideSign,
                            d * sideSign);
+    }
+
+    private void OnEnable()
+    {
+        if (Camera.main != null)
+        {
+            Camera.main.depthTextureMode = DepthTextureMode.Depth;
+        }
     }
 }

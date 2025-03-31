@@ -124,7 +124,7 @@ Material:
     - _FlowStrength: 0.1
     - _Fresnel: 1
     - _GlossMapScale: 1
-    - _Glossiness: 1
+    - _Glossiness: 0.5
     - _GlossyReflections: 1
     - _HeightScale: 0.25
     - _HeightScaleModulated: 0.75

@@ -61,10 +61,12 @@
         {
 			float noise = tex2D(_FlowMap, IN.worldPos.xz).a;
 			float time = _Time.x * 5 + noise;
-			float3 flow = tex2D(_FlowMap, IN.worldPos.xz + time).rgb;
-			flow.xy = flow.xy * 2 - 1;
+			float3 flow = tex2D(_FlowMap, IN.worldPos.xz*0.31 + time*0.1).rgb + 
+				tex2D(_FlowMap, IN.worldPos.xz*0.11 + time*0.3).rgb + 
+				tex2D(_FlowMap, IN.worldPos.xz*0.23 + time*0.2).rgb;
+			flow.xy = (flow.xy) * 2 /3	 - 1;
 			
-			IN.screenPos.xy += flow.xz * 0.0125;
+			IN.screenPos.xy += flow.xy * 0.005;
 
             // Use _Color for the water's base properties (RGB values remain untouched).
             o.Metallic = _Metallic;
