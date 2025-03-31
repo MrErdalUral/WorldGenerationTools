@@ -13,23 +13,20 @@ namespace Grids.SpatialGrid
         private float _cellSize;
         private float _cellRadius;
 
-
         public SpatialGrid2D(float cellSize, int chunkSize = 32)
         {
             _cellSize = cellSize;
             _chunkSize = chunkSize;
             _cellRadius = 0.5f * _cellSize * Mathf.Sqrt(2f);
         }
+
         /// <summary>
-        /// Restructure cells with the new cellSize
+        /// Resizes the grid cells with a new cell size, reassigning all objects.
         /// </summary>
-        /// <param name="cellSize"></param>
         public void ResizeGridCells(float cellSize)
         {
             _cellSize = cellSize;
             _cellRadius = 0.5f * _cellSize * Mathf.Sqrt(2f);
-
-            //We only need to clear content of the cells. Min X,Y cell coordinates and existing columns & cells can be reused
             ClearCells();
 
             foreach (var obj in _allObjects)
@@ -39,13 +36,13 @@ namespace Grids.SpatialGrid
         }
 
         /// <summary>
-        /// Adds object to the grid cells
+        /// Adds an object to all grid cells it occupies.
         /// </summary>
-        /// <param name="obj"></param>
         public void AddToGrid(IGridObject2D obj)
         {
             Vector2Int minCellPos = GetCellPosition(obj.Rect.min);
             Vector2Int maxCellPos = GetCellPosition(obj.Rect.max);
+
             for (int x = minCellPos.x; x <= maxCellPos.x; x++)
             {
                 for (int y = minCellPos.y; y <= maxCellPos.y; y++)
@@ -57,9 +54,8 @@ namespace Grids.SpatialGrid
         }
 
         /// <summary>
-        /// Remove object from grid cells.
+        /// Removes an object from all grid cells it occupies.
         /// </summary>
-        /// <param name="obj"></param>
         public void RemoveFromGrid(IGridObject2D obj)
         {
             Vector2Int minCellPos = GetCellPosition(obj.Rect.min);
@@ -76,46 +72,40 @@ namespace Grids.SpatialGrid
         }
 
         /// <summary>
-        /// Checks the old and the new bounding volume of the object.
-        /// Removes the object from old cells and add them to the new ones
-        /// Does not update shared cells between old and new
+        /// Updates the grid cells for an object that has moved.
         /// </summary>
-        /// <param name="obj"></param>
-        /// <param name="displacement"></param>
         public void MoveObject(IGridObject2D obj, Vector2 displacement)
         {
-            Vector2Int prevMinCellPos = GetCellPosition(obj.Rect.min - displacement);
-            Vector2Int newMinCellPos = GetCellPosition(obj.Rect.min);
-            Vector2Int prevMaxCellPos = GetCellPosition(obj.Rect.max - displacement);
-            Vector2Int newMaxCellPos = GetCellPosition(obj.Rect.max);
+            Vector2Int prevMin = GetCellPosition(obj.Rect.min - displacement);
+            Vector2Int prevMax = GetCellPosition(obj.Rect.max - displacement);
+            Vector2Int newMin = GetCellPosition(obj.Rect.min);
+            Vector2Int newMax = GetCellPosition(obj.Rect.max);
 
-            if (prevMinCellPos == newMinCellPos && prevMaxCellPos == newMaxCellPos)
+            // If cell bounds have not changed, no update is needed.
+            if (prevMin == newMin && prevMax == newMax)
                 return;
 
-            // Remove from cells no longer in cell range
-            for (int x = prevMinCellPos.x; x <= prevMaxCellPos.x; x++)
+            // Remove from cells no longer occupied.
+            for (int x = prevMin.x; x <= prevMax.x; x++)
             {
-                for (int y = prevMinCellPos.y; y <= prevMaxCellPos.x; y++)
+                for (int y = prevMin.y; y <= prevMax.y; y++)
                 {
+                    if (x >= newMin.x && x <= newMax.x &&
+                        y >= newMin.y && y <= newMax.y)
                     {
-                        if (x >= newMinCellPos.x && x <= newMaxCellPos.x &&
-                            y >= newMinCellPos.y && y <= newMaxCellPos.y)
-                        {
-                            continue;
-                        }
-                        RemoveFromCell(obj, x, y);
+                        continue;
                     }
+                    RemoveFromCell(obj, x, y);
                 }
             }
 
-            // Add to new cells that was not previously in cell range
-            for (int x = newMinCellPos.x; x <= newMaxCellPos.x; x++)
+            // Add to cells newly occupied.
+            for (int x = newMin.x; x <= newMax.x; x++)
             {
-                for (int y = newMinCellPos.y; y <= newMaxCellPos.y; y++)
+                for (int y = newMin.y; y <= newMax.y; y++)
                 {
-
-                    if (x >= prevMinCellPos.x && x <= prevMaxCellPos.x &&
-                        y >= prevMinCellPos.y && y <= prevMaxCellPos.y)
+                    if (x >= prevMin.x && x <= prevMax.x &&
+                        y >= prevMin.y && y <= prevMax.y)
                     {
                         continue;
                     }
@@ -125,7 +115,7 @@ namespace Grids.SpatialGrid
         }
 
         /// <summary>
-        /// Clean up allocations and prepare the grid for reuse
+        /// Clears the grid and all internal caches.
         /// </summary>
         public void Clear()
         {
@@ -136,46 +126,29 @@ namespace Grids.SpatialGrid
             _grid.Clear();
         }
 
+        /// <summary>
+        /// Checks whether the specified circular area is empty.
+        /// </summary>
         public bool CheckRadiusEmpty(float radius, Vector2 center)
         {
-            Vector2Int minCellPos = GetCellPosition(center - Vector2.one * radius);
-            Vector2Int maxCellPos = GetCellPosition(center + Vector2.one * radius);
+            Vector2Int minCell = GetCellPosition(center - Vector2.one * radius);
+            Vector2Int maxCell = GetCellPosition(center + Vector2.one * radius);
+            Vector2Int minChunk = GetChunkPosition(minCell.x, minCell.y);
+            Vector2Int maxChunk = GetChunkPosition(maxCell.x, maxCell.y);
 
-            // Then figure out which chunks that cell range spans.
-            Vector2Int minChunkPos = GetChunkPosition(minCellPos.x, minCellPos.y);
-            Vector2Int maxChunkPos = GetChunkPosition(maxCellPos.x, maxCellPos.y);
-
-            // Iterate over each chunk in the relevant range
-            for (int chunkX = minChunkPos.x; chunkX <= maxChunkPos.x; chunkX++)
+            for (int chunkX = minChunk.x; chunkX <= maxChunk.x; chunkX++)
             {
                 int chunkMinX = chunkX * _chunkSize;
-                int chunkMaxX = chunkMinX + (_chunkSize - 1);
+                var (localMinX, localMaxX) = GetLocalBounds(chunkMinX, minCell.x, maxCell.x);
 
-                // Clamp this chunk’s local iteration range to [minCellPos.x .. maxCellPos.x]
-                int localMinX = 0;
-                if (chunkMinX < minCellPos.x)
-                    localMinX = CalculateChunkLocal(Math.Max(chunkMinX, minCellPos.x));
-                int localMaxX = _chunkSize - 1;
-                if (chunkMaxX > maxCellPos.x)
-                    localMaxX = CalculateChunkLocal(Math.Min(chunkMaxX, maxCellPos.x));
-
-                for (int chunkY = minChunkPos.y; chunkY <= maxChunkPos.y; chunkY++)
+                for (int chunkY = minChunk.y; chunkY <= maxChunk.y; chunkY++)
                 {
                     int chunkMinY = chunkY * _chunkSize;
-                    int chunkMaxY = chunkMinY + (_chunkSize - 1);
-
-                    int localMinY = 0;
-                    if (chunkMinY < minCellPos.y)
-                        localMinY = CalculateChunkLocal(Math.Max(chunkMinY, minCellPos.y));
-                    int localMaxY = _chunkSize - 1;
-                    if (chunkMaxY > maxCellPos.y)
-                        localMaxY = CalculateChunkLocal(Math.Min(chunkMaxY, maxCellPos.y));
+                    var (localMinY, localMaxY) = GetLocalBounds(chunkMinY, minCell.y, maxCell.y);
                     var chunkPos = new Vector2Int(chunkX, chunkY);
                     if (!_grid.TryGetValue(chunkPos, out var chunk))
                         continue;
 
-
-                    // Iterate the cells in this chunk that lie within our bounding box range
                     for (int lx = localMinX; lx <= localMaxX; lx++)
                     {
                         int cellX = chunkMinX + lx;
@@ -187,84 +160,55 @@ namespace Grids.SpatialGrid
                                 continue;
 
                             Vector2 cellCenter = GetCellCenter(cellX, cellY);
+                            float distance = (cellCenter - center).magnitude;
 
-                            float distToCenter = (cellCenter - center).magnitude;
-
-                            if (distToCenter <= (radius - _cellRadius)) //Query fully covers the whole cell
-                            {
+                            if (distance <= (radius - _cellRadius))
                                 return false;
-                            }
-                            else if (distToCenter > (radius + _cellRadius)) //Query does not cover the cell at all
+                            else if (distance > (radius + _cellRadius))
+                                continue;
+                            else
                             {
-                                // skip
-                            }
-                            else // Query overlaps the cell
-                            {
-                                // Partial overlap => do per-object checks
                                 foreach (var obj in cell)
                                 {
-                                    // Avoid duplicates in final result
                                     if (_uniqueResults.Contains(obj))
                                         continue;
-
-                                    // Use the object’s bounding sphere or a simpler center+radius check:
                                     float distSq = (obj.Position2D - center).sqrMagnitude;
-                                    float combinedRadius = obj.Radius + radius;
-                                    if (distSq <= combinedRadius * combinedRadius)
-                                    {
+                                    float combined = obj.Radius + radius;
+                                    if (distSq <= combined * combined)
                                         return false;
-                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-
             return true;
         }
 
+        /// <summary>
+        /// Adds all objects overlapping the specified circular area into the result list.
+        /// </summary>
         public void RadiusQuery(float radius, Vector2 center, List<IGridObject2D> resultList)
         {
             Rect sphereBounds = new Rect(center - Vector2.one * radius, Vector2.one * (2f * radius));
-            Vector2Int minCellPos = GetCellPosition(sphereBounds.min);
-            Vector2Int maxCellPos = GetCellPosition(sphereBounds.max);
+            Vector2Int minCell = GetCellPosition(sphereBounds.min);
+            Vector2Int maxCell = GetCellPosition(sphereBounds.max);
+            Vector2Int minChunk = GetChunkPosition(minCell.x, minCell.y);
+            Vector2Int maxChunk = GetChunkPosition(maxCell.x, maxCell.y);
 
-            // Then figure out which chunks that cell range spans.
-            Vector2Int minChunkPos = GetChunkPosition(minCellPos.x, minCellPos.y);
-            Vector2Int maxChunkPos = GetChunkPosition(maxCellPos.x, maxCellPos.y);
-
-            // Iterate over each chunk in the relevant range
-            for (int chunkX = minChunkPos.x; chunkX <= maxChunkPos.x; chunkX++)
+            for (int chunkX = minChunk.x; chunkX <= maxChunk.x; chunkX++)
             {
                 int chunkMinX = chunkX * _chunkSize;
-                int chunkMaxX = chunkMinX + (_chunkSize - 1);
+                var (localMinX, localMaxX) = GetLocalBounds(chunkMinX, minCell.x, maxCell.x);
 
-                // Clamp this chunk’s local iteration range to [minCellPos.x .. maxCellPos.x]
-                int localMinX = 0;
-                if (chunkMinX < minCellPos.x)
-                    localMinX = CalculateChunkLocal(Math.Max(chunkMinX, minCellPos.x));
-                int localMaxX = _chunkSize - 1;
-                if (chunkMaxX > maxCellPos.x)
-                    localMaxX = CalculateChunkLocal(Math.Min(chunkMaxX, maxCellPos.x));
-
-                for (int chunkY = minChunkPos.y; chunkY <= maxChunkPos.y; chunkY++)
+                for (int chunkY = minChunk.y; chunkY <= maxChunk.y; chunkY++)
                 {
                     int chunkMinY = chunkY * _chunkSize;
-                    int chunkMaxY = chunkMinY + (_chunkSize - 1);
-
-                    int localMinY = 0;
-                    if (chunkMinY < minCellPos.y)
-                        localMinY = CalculateChunkLocal(Math.Max(chunkMinY, minCellPos.y));
-                    int localMaxY = _chunkSize - 1;
-                    if (chunkMaxY > maxCellPos.y)
-                        localMaxY = CalculateChunkLocal(Math.Min(chunkMaxY, maxCellPos.y));
+                    var (localMinY, localMaxY) = GetLocalBounds(chunkMinY, minCell.y, maxCell.y);
                     var chunkPos = new Vector2Int(chunkX, chunkY);
                     if (!_grid.TryGetValue(chunkPos, out var chunk))
                         continue;
 
-
-                    // Iterate the cells in this chunk that lie within our bounding box range
                     for (int lx = localMinX; lx <= localMaxX; lx++)
                     {
                         int cellX = chunkMinX + lx;
@@ -275,53 +219,29 @@ namespace Grids.SpatialGrid
                             if (cell == null || cell.Count < 1)
                                 continue;
 
-                            //----------------------------------------------------
-                            // 1) Compute the center of this cell
-                            //----------------------------------------------------
                             Vector2 cellCenter = GetCellCenter(cellX, cellY);
+                            float distance = (cellCenter - center).magnitude;
 
-                            //----------------------------------------------------
-                            // 2) Distance-based culling logic:
-                            //
-                            //    d = distance(queryCenter, cellCenter)
-                            //    If (d + *halfDiag < radius) => entire cell inside
-                            //    If (d > radius + halfDiag) => entire cell outside
-                            //    else => partial => check per-object
-                            //----------------------------------------------------
-                            float distToCenter = (cellCenter - center).magnitude;
-
-                            if (distToCenter <= (radius - _cellRadius)) //Query fully covers the whole cell
-                            {
+                            if (distance <= (radius - _cellRadius))
                                 _uniqueResults.UnionWith(cell);
-                            }
-                            else if (distToCenter > (radius + _cellRadius)) //Query does not cover the cell at all
+                            else if (distance > (radius + _cellRadius))
+                                continue;
+                            else
                             {
-                                // skip
-                            }
-                            else//Overlaps
-                            {
-                                // Partial overlap => do per-object checks
                                 foreach (var obj in cell)
                                 {
-                                    // Avoid duplicates in final result
                                     if (_uniqueResults.Contains(obj))
                                         continue;
-
-                                    // Use the object’s bounding sphere or a simpler center+radius check:
                                     float distSq = (obj.Position2D - center).sqrMagnitude;
-                                    float combinedRadius = obj.Radius + radius;
-                                    if (distSq <= combinedRadius * combinedRadius)
-                                    {
+                                    float combined = obj.Radius + radius;
+                                    if (distSq <= combined * combined)
                                         _uniqueResults.Add(obj);
-                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-
-            // Now copy results to the caller’s list
             if (_uniqueResults.Count > 0)
             {
                 resultList.AddRange(_uniqueResults);
@@ -331,78 +251,48 @@ namespace Grids.SpatialGrid
             _uniqueResults.Clear();
         }
 
-
-
         /// <summary>
-        /// fills resultList with unique results from the grid.
+        /// Adds all objects overlapping the specified box into the result list.
         /// </summary>
-        /// <param name="box"></param>
-        /// <param name="resultList"></param>
         public void BoxQuery(Rect box, List<IGridObject2D> resultList)
         {
-            Vector2Int minCellPos = GetCellPosition(box.min);
-            Vector2Int maxCellPos = GetCellPosition(box.max);
+            Vector2Int minCell = GetCellPosition(box.min);
+            Vector2Int maxCell = GetCellPosition(box.max);
+            Vector2Int minChunk = GetChunkPosition(minCell.x, minCell.y);
+            Vector2Int maxChunk = GetChunkPosition(maxCell.x, maxCell.y);
 
-            // Determine which chunks we need to cover
-            Vector2Int minChunkPos = GetChunkPosition(minCellPos.x, minCellPos.y);
-            Vector2Int maxChunkPos = GetChunkPosition(maxCellPos.x, maxCellPos.y);
-
-            for (int chunkX = minChunkPos.x; chunkX <= maxChunkPos.x; chunkX++)
+            for (int chunkX = minChunk.x; chunkX <= maxChunk.x; chunkX++)
             {
-                // Global cell range covered by this chunk
                 int chunkMinX = chunkX * _chunkSize;
-                int chunkMaxX = chunkMinX + (_chunkSize - 1);
+                var (localMinX, localMaxX) = GetLocalBounds(chunkMinX, minCell.x, maxCell.x);
 
-                // Clamp to our query’s [minCellPos.X..maxCellPos.X]
-                int localMinX = 0;
-                if (chunkMinX < minCellPos.x)
-                    localMinX = CalculateChunkLocal(Math.Max(chunkMinX, minCellPos.x));
-
-                int localMaxX = _chunkSize - 1;
-                if (chunkMaxX > maxCellPos.x)
-                    localMaxX = CalculateChunkLocal(Math.Min(chunkMaxX, maxCellPos.x));
-                for (int chunkY = minChunkPos.y; chunkY <= maxChunkPos.y; chunkY++)
+                for (int chunkY = minChunk.y; chunkY <= maxChunk.y; chunkY++)
                 {
-                    // Global cell range covered by this chunk
                     int chunkMinY = chunkY * _chunkSize;
-                    int chunkMaxY = chunkMinY + (_chunkSize - 1);
-
-                    // Clamp to our query’s [minCellPos.X..maxCellPos.X]
-                    int localMinY = 0;
-                    if (chunkMinY < minCellPos.y)
-                        localMinY = CalculateChunkLocal(Math.Max(chunkMinY, minCellPos.y));
-
-                    int localMaxY = _chunkSize - 1;
-                    if (chunkMaxY > maxCellPos.y)
-                        localMaxY = CalculateChunkLocal(Math.Min(chunkMaxY, maxCellPos.y));
+                    var (localMinY, localMaxY) = GetLocalBounds(chunkMinY, minCell.y, maxCell.y);
                     var chunkPos = new Vector2Int(chunkX, chunkY);
                     if (!_grid.TryGetValue(chunkPos, out var chunk))
                         continue;
 
-
-                    for (int localX = localMinX; localX <= localMaxX; localX++)
+                    for (int lx = localMinX; lx <= localMaxX; lx++)
                     {
-                        int cellX = chunkMinX + localX;
-                        for (int localY = localMinX; localY <= localMaxY; localY++)
+                        int cellX = chunkMinX + lx;
+                        for (int ly = localMinY; ly <= localMaxY; ly++)
                         {
-                            int cellY = chunkMinY + localY;
-                            var cell = chunk[localX, localMaxY];
+                            int cellY = chunkMinY + ly;
+                            var cell = chunk[lx, ly];
                             if (cell == null)
                                 continue;
 
-                            var bounds = GetCellBounds(cellX, cellY);
-                            // If the query box fully contains this cell's bounding box,
-                            // union the entire cell at once.
-                            if (box.Contains(bounds.min) && box.Contains(bounds.max))
-                            {
+                            Rect cellBounds = GetCellBounds(cellX, cellY);
+                            if (box.Contains(cellBounds.min) && box.Contains(cellBounds.max))
                                 _uniqueResults.UnionWith(cell);
-                            }
                             else
                             {
-                                // Otherwise check individual bounding boxes
                                 foreach (var obj in cell)
                                 {
-                                    if (_uniqueResults.Contains(obj)) continue;
+                                    if (_uniqueResults.Contains(obj))
+                                        continue;
                                     if (obj.Rect.Overlaps(box))
                                         _uniqueResults.Add(obj);
                                 }
@@ -411,136 +301,138 @@ namespace Grids.SpatialGrid
                     }
                 }
             }
-
-            var count = _uniqueResults.Count;
-            if (count > 0)
+            if (_uniqueResults.Count > 0)
             {
                 resultList.AddRange(_uniqueResults);
-                //If the m_uniqueResults capacity is too big from a query we want to trim it for future query performance
-                if (count > 16)
+                if (_uniqueResults.Count > 16)
                     _uniqueResults.TrimExcess();
             }
             _uniqueResults.Clear();
-
         }
 
         #region Private Methods
 
-        private static int FloorDivInt(int value, int size)
-        {
-            // If value >= 0, integer division is fine.
-            // If negative, adjust so we truly floor (e.g., -3/2 => -2 in math floor).
-            if (value >= 0)
-                return value / size;
-            else
-                return (value + 1) / size - 1;
-        }
+        /// <summary>
+        /// Returns the floored division result for negative numbers.
+        /// </summary>
+        private static int FloorDivInt(int value, int size) =>
+            value >= 0 ? value / size : (value + 1) / size - 1;
 
-        private Vector2Int GetChunkPosition(int cellX, int cellY)
-        {
-            return new Vector2Int(FloorDivInt(cellX, _chunkSize),
-                FloorDivInt(cellY, _chunkSize));
-        }
-
-        //FloorDiv logic not needed here since we are working with float values
+        /// <summary>
+        /// Converts a world position to a cell coordinate.
+        /// </summary>
         private Vector2Int GetCellPosition(Vector3 pos)
         {
-            return new Vector2Int((int)(pos.x / _cellSize) - (pos.x < 0 ? 1 : 0),
-                (int)(pos.y / _cellSize) - (pos.y < 0 ? 1 : 0));
+            int x = (int)(pos.x / _cellSize) - (pos.x < 0 ? 1 : 0);
+            int y = (int)(pos.y / _cellSize) - (pos.y < 0 ? 1 : 0);
+            return new Vector2Int(x, y);
         }
 
-        private HashSet<IGridObject2D> CreateCell()
-        {
-            return new HashSet<IGridObject2D>();
-        }
+        /// <summary>
+        /// Converts cell coordinates to the corresponding chunk coordinate.
+        /// </summary>
+        private Vector2Int GetChunkPosition(int cellX, int cellY) =>
+            new Vector2Int(FloorDivInt(cellX, _chunkSize), FloorDivInt(cellY, _chunkSize));
 
-        private HashSet<IGridObject2D>[,] CreateChunk()
-        {
-            return new HashSet<IGridObject2D>[_chunkSize, _chunkSize];
-        }
+        /// <summary>
+        /// Creates a new cell.
+        /// </summary>
+        private HashSet<IGridObject2D> CreateCell() => new HashSet<IGridObject2D>();
 
+        /// <summary>
+        /// Creates a new chunk.
+        /// </summary>
+        private HashSet<IGridObject2D>[,] CreateChunk() => new HashSet<IGridObject2D>[_chunkSize, _chunkSize];
+
+        /// <summary>
+        /// Adds an object to a specific cell.
+        /// </summary>
         private void AddToCell(IGridObject2D obj, int cellX, int cellY)
         {
-            var chunkPos = GetChunkPosition(cellX, cellY);
+            Vector2Int chunkPos = GetChunkPosition(cellX, cellY);
             if (!_grid.TryGetValue(chunkPos, out var chunk))
             {
                 chunk = CreateChunk();
                 _grid.Add(chunkPos, chunk);
             }
 
-            var localX = CalculateChunkLocal(cellX);
-            var localY = CalculateChunkLocal(cellY);
+            int localX = CalculateChunkLocal(cellX);
+            int localY = CalculateChunkLocal(cellY);
 
-            var cell = chunk[localX, localY];
-            if (cell == null)
-            {
-                cell = CreateCell();
-                chunk[localX, localY] = cell;
-            }
-            cell.Add(obj);
+            if (chunk[localX, localY] == null)
+                chunk[localX, localY] = CreateCell();
+            chunk[localX, localY].Add(obj);
         }
 
+        /// <summary>
+        /// Removes an object from a specific cell.
+        /// </summary>
         private void RemoveFromCell(IGridObject2D obj, int cellX, int cellY)
         {
-            var chunkPos = GetChunkPosition(cellX, cellY);
-
-            var localX = CalculateChunkLocal(cellX);
-            var localY = CalculateChunkLocal(cellY);
-
-            if (!_grid.TryGetValue(chunkPos, out var chunk)) return;
-            var cell = chunk[localX, localY];
-            cell.Remove(obj);
+            Vector2Int chunkPos = GetChunkPosition(cellX, cellY);
+            int localX = CalculateChunkLocal(cellX);
+            int localY = CalculateChunkLocal(cellY);
+            if (_grid.TryGetValue(chunkPos, out var chunk))
+                chunk[localX, localY]?.Remove(obj);
         }
 
+        /// <summary>
+        /// Converts a global cell coordinate to a local chunk coordinate.
+        /// </summary>
         private int CalculateChunkLocal(int value)
         {
-            var local = (value % _chunkSize);
+            int local = value % _chunkSize;
             if (local < 0)
                 local += _chunkSize;
             return local;
         }
 
+        /// <summary>
+        /// Returns the world-space bounds for a cell.
+        /// </summary>
         private Rect GetCellBounds(int cellX, int cellY)
         {
-            var rect = new Rect
+            return new Rect
             {
                 min = new Vector2(cellX * _cellSize, cellY * _cellSize),
                 max = new Vector2((cellX + 1) * _cellSize, (cellY + 1) * _cellSize)
             };
-            return rect;
         }
 
         /// <summary>
-        /// Clears all the cells in the grid
+        /// Calculates the local bounds (min and max indices) for a chunk given global cell bounds.
+        /// </summary>
+        private (int localMin, int localMax) GetLocalBounds(int chunkStart, int globalMin, int globalMax)
+        {
+            int localMin = Mathf.Max(0, globalMin - chunkStart);
+            int localMax = Mathf.Min(_chunkSize - 1, globalMax - chunkStart);
+            return (localMin, localMax);
+        }
+
+        /// <summary>
+        /// Clears all cells in the grid.
         /// </summary>
         private void ClearCells()
         {
-            foreach (var pair in _grid)
+            foreach (var kvp in _grid)
             {
-                var chunk = pair.Value;
+                var chunk = kvp.Value;
                 for (int x = 0; x < _chunkSize; x++)
                 {
-                    for (var y = 0; y < _chunkSize; y++)
+                    for (int y = 0; y < _chunkSize; y++)
                     {
-                        var cell = chunk[x, y];
-                        if (cell == null) continue;
-                        cell.Clear();
+                        chunk[x, y]?.Clear();
                     }
                 }
             }
         }
+
         /// <summary>
-        /// Returns the center of a cell at (cellX, cellY, cellZ) in world space.
+        /// Returns the center of a cell in world space.
         /// </summary>
-        private Vector2 GetCellCenter(int cellX, int cellY)
-        {
-            // For a cell from [cellX * _cellSize .. (cellX+1) * _cellSize],
-            // the center is (cellX + 0.5) * _cellSize. Same for Y and Z.
-            return new Vector2(
-                (cellX + 0.5f) * _cellSize,
-                (cellY + 0.5f) * _cellSize
-            );
-        }
+        private Vector2 GetCellCenter(int cellX, int cellY) =>
+            new Vector2((cellX + 0.5f) * _cellSize, (cellY + 0.5f) * _cellSize);
+
         #endregion
     }
 }

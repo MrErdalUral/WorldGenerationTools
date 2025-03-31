@@ -9,7 +9,7 @@ namespace PoissonDiscSampling
 {
     public interface IPoissonDiscSampler
     {
-        NodeGraph<IGridObject2D> SamplePointsAsync(IPoissonDiscSettings settings); // Generates and returns the graph
-        NodeGraph<IGridObject2D> NodeGraph { get; }
+        INodeGraph<IGridObject2D> SamplePointsAsync(IPoissonDiscSettings settings); // Generates and returns the graph
+        INodeGraph<IGridObject2D> NodeGraph { get; }
     }
 }

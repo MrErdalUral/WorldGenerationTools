@@ -23,12 +23,9 @@ namespace IslandGenerator.Installers
             Container.BindInterfacesAndSelfTo<SpatialGrid2D>()
                 .AsTransient()
                 .WithArguments(_islandGenerationSettings.PoissonDiscSettings.MaxRadius * 2, 16);
-
             Container.BindInterfacesAndSelfTo<PoissonDiscSampler>().AsSingle();
-
             Container.BindInterfacesAndSelfTo<Perlin2DSettings>().FromInstance(_perlinNoiseSettings).AsSingle();
             Container.BindInterfacesAndSelfTo<PerlinNoise2D>().AsSingle();
-
             Container.BindInterfacesAndSelfTo<IslandGenerator>().AsSingle();
             Container.BindFactory<IslandDto, IslandView, IslandView.Factory>()
                 .FromPoolableMemoryPool<IslandDto, IslandView, IslandViewPool>(poolBinder => poolBinder

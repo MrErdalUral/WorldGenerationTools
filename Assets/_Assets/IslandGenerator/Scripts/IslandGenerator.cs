@@ -16,88 +16,126 @@ namespace IslandGenerator
         private readonly IPoissonDiscSampler _poissonDiscSampler;
         private readonly INoise2D _noise2D;
         private readonly ConstraintOptions _options;
-        private Polygon _polygon;
 
         public IslandGenerator(IPoissonDiscSampler poissonDiscSampler, INoise2D noise2D)
         {
             _poissonDiscSampler = poissonDiscSampler;
             _noise2D = noise2D;
-            _options = new ConstraintOptions() { ConformingDelaunay = true };
+            _options = new ConstraintOptions { ConformingDelaunay = true };
         }
 
+        /// <summary>
+        /// Generates an island using the provided settings and an optional seed override.
+        /// </summary>
+        /// <param name="settings">Island generation settings.</param>
+        /// <param name="overrideSeed">Optional seed to override the settings' seed.</param>
+        /// <returns>A generated island represented by an IslandDto.</returns>
         public IslandDto GenerateIsland(IIslandGenerationSettings settings, int? overrideSeed = null)
         {
             _noise2D.SetSeed(overrideSeed ?? settings.Seed);
             var nodeGraph = _poissonDiscSampler.SamplePointsAsync(settings.PoissonDiscSettings);
 
-            var iMesh = CreateTriangleMesh(nodeGraph.Nodes);
-            var vertices = new List<Vector3>();
-            foreach (var vertex in iMesh.Vertices)
+            IMesh triangleMesh = CreateTriangleMesh(nodeGraph.Nodes);
+            if (triangleMesh == null)
             {
-                vertices.Add(new Vector3((float)vertex.X, 0, (float)vertex.Y));
+                throw new System.InvalidOperationException("Insufficient nodes to generate a valid triangle mesh.");
             }
+
+            List<Vector3> vertices = ConvertMeshVertices(triangleMesh.Vertices);
             GenerateHeights(nodeGraph, vertices, settings);
+            int[] triangles = GenerateTriangles(triangleMesh.Triangles);
 
-            var tris = new int[iMesh.Triangles.Count * 3];
-            int i = 0;
-            foreach (var meshTriangle in iMesh.Triangles)
-            {
-                tris[i] = meshTriangle.GetVertexID(0);
-                tris[i + 1] = meshTriangle.GetVertexID(2);
-                tris[i + 2] = meshTriangle.GetVertexID(1);
-                i += 3;
-            }
-
-            var island = new IslandDto(vertices, nodeGraph.Edges, tris);
-            return island;
+            return new IslandDto(vertices, nodeGraph.Edges, triangles);
         }
 
         /// <summary>
-        /// Calculates height by using noise values as slope between nodes.
+        /// Converts mesh vertices into a list of Unity Vector3 objects.
         /// </summary>
-        /// <param name="nodeGraph"></param>
-        /// <param name="vertices"></param>
-        /// <param name="settings"></param>
-        private void GenerateHeights(NodeGraph<IGridObject2D> nodeGraph, List<Vector3> vertices,
+        private List<Vector3> ConvertMeshVertices(ICollection<Vertex> meshVertices)
+        {
+            var vertices = new List<Vector3>();
+            foreach (var vertex in meshVertices)
+            {
+                vertices.Add(new Vector3((float)vertex.X, 0f, (float)vertex.Y));
+            }
+            return vertices;
+        }
+
+        /// <summary>
+        /// Generates an array of triangle indices from the mesh triangles.
+        /// </summary>
+        private int[] GenerateTriangles(ICollection<TriangleNet.Topology.Triangle> meshTriangles)
+        {
+            int[] triangles = new int[meshTriangles.Count * 3];
+            int i = 0;
+            foreach (var triangle in meshTriangles)
+            {
+                triangles[i++] = triangle.GetVertexID(0);
+                triangles[i++] = triangle.GetVertexID(2);
+                triangles[i++] = triangle.GetVertexID(1);
+            }
+            return triangles;
+        }
+
+        /// <summary>
+        /// Calculates the height of each vertex using noise values as a slope between nodes.
+        /// </summary>
+        /// <param name="nodeGraph">The node graph containing grid nodes.</param>
+        /// <param name="vertices">The list of vertices to modify.</param>
+        /// <param name="settings">Island generation settings.</param>
+        private void GenerateHeights(INodeGraph<IGridObject2D> nodeGraph, List<Vector3> vertices,
             IIslandGenerationSettings settings)
         {
-            var sigma = settings.HeightFalloffSigma;
-            foreach (var rootIndex in nodeGraph.Roots)
+            float sigma = settings.HeightFalloffSigma;
+            Vector2 worldSize = settings.WorldSize;
+
+            // Set heights for root nodes.
+            foreach (int rootIndex in nodeGraph.Roots)
             {
-                var v = vertices[rootIndex];
-                v.y = (settings.MinimumHeight + settings.MaximumHeight) * 0.5f *
-                      Mathf.Exp(-new Vector2(v.x / settings.WorldSize.x, v.z / settings.WorldSize.y).sqrMagnitude / (2f * sigma * sigma));
-                vertices[rootIndex] = v;
+                Vector3 vertex = vertices[rootIndex];
+                float falloff = Mathf.Exp(-new Vector2(vertex.x / worldSize.x, vertex.z / worldSize.y).sqrMagnitude / (2f * sigma * sigma));
+                vertex.y = (settings.MinimumHeight + settings.MaximumHeight) * 0.5f * falloff;
+                vertices[rootIndex] = vertex;
             }
-            foreach (var nodeGraphEdge in nodeGraph.Edges)
+
+            // Adjust heights along edges.
+            foreach (var edge in nodeGraph.Edges)
             {
-                var v1Index = nodeGraphEdge.Item1;
-                var v2Index = nodeGraphEdge.Item2;
-                var v1 = vertices[v1Index];
-                var v2 = vertices[v2Index];
-                var d = (_poissonDiscSampler.NodeGraph.Nodes[v1Index].Position2D -
-                         _poissonDiscSampler.NodeGraph.Nodes[v2Index].Position2D).magnitude;
-                var p = _noise2D.GetValue(v2.x, v2.z);
-                var angle = Mathf.Deg2Rad * Mathf.Lerp(-settings.MaxSlope, settings.MaxSlope, p);
-                v2.y = v1.y + Mathf.Tan(angle) * d;
-                var exponent = -new Vector2(v2.x / settings.WorldSize.x, v2.z / settings.WorldSize.y).sqrMagnitude / (2 * sigma * sigma);
+                int v1Index = edge.Item1;
+                int v2Index = edge.Item2;
+                Vector3 v1 = vertices[v1Index];
+                Vector3 v2 = vertices[v2Index];
+
+                Vector2 pos1 = _poissonDiscSampler.NodeGraph.Nodes[v1Index].Position2D;
+                Vector2 pos2 = _poissonDiscSampler.NodeGraph.Nodes[v2Index].Position2D;
+                float distance = (pos1 - pos2).magnitude;
+                float noiseValue = _noise2D.GetValue(v2.x, v2.z);
+                float angle = Mathf.Deg2Rad * Mathf.Lerp(-settings.MaxSlope, settings.MaxSlope, noiseValue);
+                v2.y = v1.y + Mathf.Tan(angle) * distance;
+
+                float exponent = -new Vector2(v2.x / worldSize.x, v2.z / worldSize.y).sqrMagnitude / (2f * sigma * sigma);
                 v2.y *= Mathf.Exp(exponent);
                 v2.y = Mathf.Clamp(v2.y, settings.MinimumHeight, settings.MaximumHeight);
                 vertices[v2Index] = v2;
             }
         }
 
+        /// <summary>
+        /// Creates a triangle mesh from the provided nodes.
+        /// </summary>
         private IMesh CreateTriangleMesh(List<IGridObject2D> nodes)
         {
-            if (nodes.Count < 3) return null;
-            _polygon = new Polygon();
+            if (nodes.Count < 3)
+            {
+                return null;
+            }
+
+            var polygon = new Polygon();
             foreach (var node in nodes)
             {
-                _polygon.Add(new Vertex(node.Position2D.x, node.Position2D.y));
+                polygon.Add(new Vertex(node.Position2D.x, node.Position2D.y));
             }
-            return _polygon.Triangulate(_options);
+            return polygon.Triangulate(_options);
         }
-
-
     }
 }
