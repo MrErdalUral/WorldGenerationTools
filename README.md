@@ -4,6 +4,8 @@
 
 This Unity project demonstrates a procedural terrain generation system that creates unique island environments using a blend of advanced algorithms and custom shaders. The project is designed to showcase various techniques for terrain creation and rendering, making it an excellent starting point for further experimentation and development.
 
+[DEMO on Itch](https://sagewind-studio.itch.io/island-generator)
+
 ## Features
 
 - **Poisson Disc Sampling 2D Point Generation:**  
