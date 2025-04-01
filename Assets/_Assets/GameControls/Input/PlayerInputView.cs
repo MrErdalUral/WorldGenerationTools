@@ -23,9 +23,15 @@ namespace GameControls.PlayerInput
         void Update()
         {
             var input = new Vector3();
+
+            if (Input.GetMouseButtonDown(0))
+                _mousePosition = Input.mousePosition;
+
             if (Input.GetMouseButton(0))
                 input = (Input.mousePosition - (Vector3)_mousePosition) * Time.deltaTime;
+
             input += Input.mouseScrollDelta.y * Time.deltaTime * Vector3.forward;
+
             CameraInput.Value = input;
             var axisInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
             AxisInput.Value = axisInput.normalized * _inputSettings.KeyBoardAxisMagnitude;
