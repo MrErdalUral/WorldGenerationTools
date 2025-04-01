@@ -31,7 +31,7 @@ This Unity project demonstrates a procedural terrain generation system that crea
 
 ### Prerequisites
 
-- [Unity](https://unity.com/) (Version 2019.4 or later recommended)
+- [Unity](https://unity.com/) (Version 2022 or later recommended)
 - (Optional) Additional dependencies or packages as needed
 
 ### Installation
