@@ -10,6 +10,7 @@ namespace GameControls.PlayerInput
 {
     public class PlayerInputView : MonoBehaviour, IPlayerInputView, IRandomizeButtonInputView
     {
+        [Inject] private readonly IInputSettings _inputSettings;
         private readonly Dictionary<KeyCode, Observable<Unit>> _keyDownSubjects = new Dictionary<KeyCode, Observable<Unit>>();
         [SerializeField] private Button _randomizeButton;
         private Vector2 _mousePosition;
@@ -23,11 +24,11 @@ namespace GameControls.PlayerInput
         {
             var input = new Vector3();
             if (Input.GetMouseButton(0))
-                input = (Input.mousePosition - (Vector3) _mousePosition) * Time.deltaTime;
+                input = (Input.mousePosition - (Vector3)_mousePosition) * Time.deltaTime;
             input += Input.mouseScrollDelta.y * Time.deltaTime * Vector3.forward;
             CameraInput.Value = input;
             var axisInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-            AxisInput.Value = axisInput.normalized;
+            AxisInput.Value = axisInput.normalized * _inputSettings.KeyBoardAxisMagnitude;
             if (axisInput.sqrMagnitude != 0)
                 AxisInput.ForceNotify();
             _mousePosition = Input.mousePosition;
@@ -37,22 +38,10 @@ namespace GameControls.PlayerInput
         {
             if (_keyDownSubjects.TryGetValue(key, out var subject)) return subject;
 
-            subject = Observable.EveryUpdate().Where(_ => Input.GetKeyDown(key)); 
-            _keyDownSubjects.Add(key,subject);
+            subject = Observable.EveryUpdate().Where(_ => Input.GetKeyDown(key));
+            _keyDownSubjects.Add(key, subject);
             return subject;
         }
 
-    }
-
-    public interface IPlayerInputView
-    {
-        ReactiveProperty<Vector3> CameraInput { get; }
-        ReactiveProperty<Vector2> AxisInput { get; }
-        Observable<Unit> GetOrCreateKeyDownObservable(KeyCode key);
-    }
-
-    public interface IRandomizeButtonInputView
-    {
-        Observable<Unit> RandomizeButtonClicked { get; }
     }
 }

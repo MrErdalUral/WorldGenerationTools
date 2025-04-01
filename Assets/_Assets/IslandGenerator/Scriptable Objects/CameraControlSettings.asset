@@ -15,5 +15,5 @@ MonoBehaviour:
   _yawSpeed: 10
   _pitchSpeed: -10
   _zoomSpeed: -1000
-  _pitchAngleLimits: {x: 5, y: 89.99999}
+  _pitchAngleLimits: {x: 5, y: 89}
   _zoomLimits: {x: 85, y: 200}

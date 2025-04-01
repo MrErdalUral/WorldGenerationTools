@@ -20,6 +20,7 @@ namespace GameControls.Installers
             Container.BindInterfacesAndSelfTo<OrbitalGameCameraModel>().AsSingle();
             Container.BindInterfacesAndSelfTo<GameCameraView>().FromInstance(_gameCameraView).AsSingle();
             Container.BindInterfacesAndSelfTo<GameCameraPresenter>().AsSingle();
+            Container.BindInterfacesAndSelfTo<InputSettings>().FromInstance(new InputSettings(0.5f)).AsSingle();
         }
     }
 }
