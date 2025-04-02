@@ -9,7 +9,7 @@ This Unity project demonstrates a procedural terrain generation system that crea
 ## Features
 
 - **Poisson Disc Sampling 2D Point Generation:**  
-  Evenly distributes points across a 2D space to form a robust base for terrain features.
+  Perlin noise based density texture distributes points across a 2D space to form a robust base for terrain features.
 
 - **Triangle.Net Delaunay Triangulation:**  
   Uses Triangle.Net to triangulate the points, generating a mesh structure from the Poisson disc distribution.
