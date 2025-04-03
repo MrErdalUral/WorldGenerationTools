@@ -14,19 +14,6 @@ namespace PoissonDiscSampling.Settings
         [SerializeField]private int _numSamplesBeforeRejection = 30;
         [SerializeField] [Range(1, 5)] private int _numberOfRoots;
 
-        public Subject<Unit> OnValuesChanged;
-
-        void OnEnable()
-        {
-            OnValuesChanged = new Subject<Unit>();
-        }
-
-        private void OnValidate()
-        {
-            if (Application.isPlaying)
-                OnValuesChanged.OnNext(Unit.Default);
-        }
-
         public Vector2 RegionSize => _regionSize;
         public float MinRadius => _minRadius;
         public float MaxRadius => _maxRadius;

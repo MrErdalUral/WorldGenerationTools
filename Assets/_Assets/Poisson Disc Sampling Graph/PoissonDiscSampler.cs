@@ -26,7 +26,7 @@ namespace PoissonDiscSampling
             _noise2D = noise2D ?? throw new ArgumentNullException(nameof(noise2D));
         }
 
-        public INodeGraph<IGridObject2D> SamplePointsAsync(IPoissonDiscSettings settings)
+        public INodeGraph<IGridObject2D> SamplePoints(IPoissonDiscSettings settings)
         {
             if (settings == null)
             {

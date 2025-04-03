@@ -33,10 +33,9 @@ namespace IslandGenerator
         public IslandDto GenerateIsland(IIslandGenerationSettings settings, int? overrideSeed = null)
         {
             _noise2D.SetSeed(overrideSeed ?? settings.Seed);
-            var nodeGraph = _poissonDiscSampler.SamplePointsAsync(settings.PoissonDiscSettings);
+            var nodeGraph = _poissonDiscSampler.SamplePoints(settings.PoissonDiscSettings);
 
-            IMesh triangleMesh = CreateTriangleMesh(nodeGraph.Nodes);
-            if (triangleMesh == null)
+            if (!TryCreateTriangleMesh(nodeGraph.Nodes, out var triangleMesh))
             {
                 throw new System.InvalidOperationException("Insufficient nodes to generate a valid triangle mesh.");
             }
@@ -123,11 +122,12 @@ namespace IslandGenerator
         /// <summary>
         /// Creates a triangle mesh from the provided nodes.
         /// </summary>
-        private IMesh CreateTriangleMesh(List<IGridObject2D> nodes)
+        private bool TryCreateTriangleMesh(List<IGridObject2D> nodes, out IMesh mesh)
         {
+            mesh = null;
             if (nodes.Count < 3)
             {
-                return null;
+                return false;
             }
 
             var polygon = new Polygon();
@@ -135,7 +135,9 @@ namespace IslandGenerator
             {
                 polygon.Add(new Vertex(node.Position2D.x, node.Position2D.y));
             }
-            return polygon.Triangulate(_options);
+
+            mesh = polygon.Triangulate(_options);
+            return true;
         }
     }
 }

@@ -3,17 +3,21 @@ using UnityEngine;
 
 namespace IslandGenerator
 {
-    public struct IslandDto
+    public readonly struct IslandDto
     {
-        public List<Vector3> IslandVertices;
-        public List<(int, int)> IslandPaths;
-        public int[] IslandTriangles;
+        private readonly List<Vector3> _islandVertices;
+        private readonly List<(int, int)> _islandPaths;
+        private readonly int[] _islandTriangles;
+
+        public List<Vector3> IslandVertices => _islandVertices;
+        public List<(int, int)> IslandPaths => _islandPaths;
+        public int[] IslandTriangles => _islandTriangles;
 
         public IslandDto(List<Vector3> vertices, List<(int, int)> paths, int[] triangles)
         {
-            IslandVertices = vertices;
-            IslandPaths = paths;
-            IslandTriangles = triangles;
+            _islandVertices = vertices;
+            _islandPaths = paths;
+            _islandTriangles = triangles;
         }
     }
 }

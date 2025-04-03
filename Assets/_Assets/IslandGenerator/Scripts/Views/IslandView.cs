@@ -1,4 +1,3 @@
-using System;
 using Grids;
 using PoissonDiscSampling;
 using UnityEngine;
@@ -7,14 +6,14 @@ using Mesh = UnityEngine.Mesh;
 
 namespace IslandGenerator.View
 {
-    public class IslandView : MonoBehaviour, IPoolable<IslandDto, IMemoryPool>, IDisposable
+    public class IslandView : MonoBehaviour, IIslandView
     {
         [SerializeField] private MeshFilter _meshFilter;
 
         private IMemoryPool _pool;
         private Mesh _mesh;
 
-        [Inject]private readonly IPoissonDiscSampler _sampler;
+        [Inject] private readonly IPoissonDiscSampler _sampler;
 
         public void OnDespawned()
         {
@@ -38,9 +37,16 @@ namespace IslandGenerator.View
             _pool.Despawn(this);
         }
 
-        public class Factory : PlaceholderFactory<IslandDto, IslandView>
+        public class Factory : PlaceholderFactory<IslandDto, IslandView>, IIslandViewFactory
         {
 
         }
+
+        public Vector3 Position
+        {
+            set => transform.position = value;
+        }
     }
+
+    public interface IIslandViewFactory : IFactory<IslandDto, IslandView> { }
 }

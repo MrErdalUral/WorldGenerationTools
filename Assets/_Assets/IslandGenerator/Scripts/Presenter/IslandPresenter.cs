@@ -13,7 +13,7 @@ namespace IslandGenerator.Presenter
 {
     public class IslandPresenter : IInitializable, IDisposable
     {
-        private readonly IslandView.Factory _islandViewFactory;
+        private readonly IIslandViewFactory _islandViewFactory;
         private readonly IIslandGenerationSettings _islandGenerationSettings;
         private readonly IIslandGenerator _islandGenerator;
         private readonly IPlayerInputView _playerInputView;
@@ -22,7 +22,7 @@ namespace IslandGenerator.Presenter
         private DisposableBag _disposableBag;
         private DisposableBag _islandsDisposableBag;
 
-        public IslandPresenter(IslandView.Factory islandViewFactory,
+        public IslandPresenter(IIslandViewFactory islandViewFactory,
             IIslandGenerationSettings islandGenerationSettings,
             IIslandGenerator islandGenerator, 
             IPlayerInputView playerInputView, 
@@ -58,7 +58,7 @@ namespace IslandGenerator.Presenter
 
             var islandView = _islandViewFactory.Create(islandDto);
             islandView.AddTo(ref _islandsDisposableBag);
-            islandView.transform.position = Vector3.zero;
+            islandView.Position = Vector3.zero;
         }
     }
 }

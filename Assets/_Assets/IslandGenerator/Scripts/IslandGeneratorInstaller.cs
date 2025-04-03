@@ -15,6 +15,7 @@ namespace IslandGenerator.Installers
         [SerializeField] private IslandView _islandViewPrefab;
         [SerializeField] private Perlin2DSettings _perlinNoiseSettings;
         [SerializeField] private IslandGenerationSettings _islandGenerationSettings;
+
         public override void InstallBindings()
         {
             Random.InitState(0);
@@ -27,12 +28,13 @@ namespace IslandGenerator.Installers
             Container.BindInterfacesAndSelfTo<Perlin2DSettings>().FromInstance(_perlinNoiseSettings).AsSingle();
             Container.BindInterfacesAndSelfTo<PerlinNoise2D>().AsSingle();
             Container.BindInterfacesAndSelfTo<IslandGenerator>().AsSingle();
-            Container.BindFactory<IslandDto, IslandView, IslandView.Factory>()
+            Container.BindFactoryCustomInterface<IslandDto, IslandView, IslandView.Factory, IIslandViewFactory>()
                 .FromPoolableMemoryPool<IslandDto, IslandView, IslandViewPool>(poolBinder => poolBinder
                     .FromComponentInNewPrefab(_islandViewPrefab));
             Container.BindInterfacesAndSelfTo<IslandGenerationSettings>().FromInstance(_islandGenerationSettings).AsSingle();
             Container.BindInterfacesAndSelfTo<IslandPresenter>().AsSingle();
         }
+
     }
     class IslandViewPool : MonoPoolableMemoryPool<IslandDto, IMemoryPool, IslandView>
     {
